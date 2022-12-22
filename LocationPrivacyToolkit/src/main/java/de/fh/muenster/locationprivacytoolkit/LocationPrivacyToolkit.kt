@@ -13,14 +13,16 @@ import java.lang.ref.WeakReference
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 
-class LocationPrivacyToolkit {
+class LocationPrivacyToolkit(context: Context) {
 
-    private var locationManager: LocationManager
     private val contextReference: WeakReference<Context>
+    private val locationManager: LocationManager
+    private val config: LocationPrivacyConfig
 
-    constructor(context: Context) {
-        locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
+    init {
         contextReference = WeakReference(context)
+        locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
+        config = LocationPrivacyConfig(context)
     }
 
     @RequiresApi(Build.VERSION_CODES.P)
@@ -122,5 +124,10 @@ class LocationPrivacyToolkit {
         pendingIntent: PendingIntent
     ) {
         locationManager.requestLocationUpdates(provider, locationRequest, pendingIntent)
+    }
+
+    private fun processLocation(location: Location?): Location? {
+        // TODO: process location according to user-config
+        return location
     }
 }
