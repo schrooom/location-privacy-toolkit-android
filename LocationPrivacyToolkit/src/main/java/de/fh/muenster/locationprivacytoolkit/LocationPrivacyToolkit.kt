@@ -9,6 +9,8 @@ import android.location.*
 import android.os.*
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
+import de.fh.muenster.locationprivacytoolkit.processors.AccuracyProcessor
+import de.fh.muenster.locationprivacytoolkit.processors.IntervalProcessor
 import java.lang.ref.WeakReference
 import java.util.concurrent.Executor
 import java.util.function.Consumer
@@ -19,10 +21,16 @@ class LocationPrivacyToolkit(context: Context) {
     private val locationManager: LocationManager
     private val config: LocationPrivacyConfig
 
+    private val accuracyProcessor: AccuracyProcessor
+    private val intervalProcessor: IntervalProcessor
+
     init {
         contextReference = WeakReference(context)
         locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
         config = LocationPrivacyConfig(context)
+
+        accuracyProcessor = AccuracyProcessor(context)
+        intervalProcessor = IntervalProcessor(context)
     }
 
     @RequiresApi(Build.VERSION_CODES.P)
@@ -126,8 +134,10 @@ class LocationPrivacyToolkit(context: Context) {
         locationManager.requestLocationUpdates(provider, locationRequest, pendingIntent)
     }
 
-    private fun processLocation(location: Location?): Location? {
-        // TODO: process location according to user-config
+    private fun processLocation(location: Location): Location {
+
         return location
+                .let { accuracyProcessor.process(it) }
+                .let { intervalProcessor.process(it) }
     }
 }
