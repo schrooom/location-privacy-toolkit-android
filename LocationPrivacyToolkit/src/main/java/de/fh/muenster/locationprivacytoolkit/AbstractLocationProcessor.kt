@@ -6,7 +6,7 @@ import android.location.*
 /**
  * Abstract class which processes a location
  * It's meant to be implemented by a subclass
- * which defines it's logic in the `process` function
+ * which defines its logic in the `process` function
  *
  * @param context The application context
  */
@@ -28,7 +28,7 @@ abstract class AbstractLocationProcessor(context: Context) {
     }
 
     /**
-     * The function that processes a location based
+     * The function that processes a location
      *
      * @param location A location object that will be manipulated
      * @return A manipulated location
