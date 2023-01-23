@@ -3,6 +3,7 @@ package de.fh.muenster.locationprivacytoolkit.processors
 import android.content.Context
 import android.location.*
 import de.fh.muenster.locationprivacytoolkit.AbstractLocationProcessor
+import de.fh.muenster.locationprivacytoolkit.LocationPrivacyConfig
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyConfigKey
 
 /**
@@ -17,10 +18,7 @@ class AccuracyProcessor(context: Context): AbstractLocationProcessor(context) {
      * The location will be moved to a random point around the actual
      * point and the `accuracy` metadata will be changed as well
      */
-    override fun process(location: Location): Location {
-        // get config or return location if config is null
-        val config = this.getConfig() ?: return location
-
+    override fun manipulateLocation(location: Location, config: Int): Location {
         // TODO: translate config to actual desired accuracy in meters
 
         val randomDirection = (0..359).random()

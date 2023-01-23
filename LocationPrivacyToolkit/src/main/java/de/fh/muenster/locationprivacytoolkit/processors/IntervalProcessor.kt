@@ -8,10 +8,7 @@ import de.fh.muenster.locationprivacytoolkit.LocationPrivacyConfigKey
 class IntervalProcessor(context: Context): AbstractLocationProcessor(context) {
     override var configKey = LocationPrivacyConfigKey.interval
 
-    override fun process(location: Location): Location {
-        // get config or return location if config is null
-        val config = this.getConfig() ?: return location
-
+    override fun manipulateLocation(location: Location, config: Int): Location {
         // TODO: implement interval logic
 
         return location

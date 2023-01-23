@@ -18,20 +18,39 @@ abstract class AbstractLocationProcessor(context: Context) {
     private var config: LocationPrivacyConfig = LocationPrivacyConfig(context)
 
     /**
-     * Function can be consumed by the subclass to get
-     * the corresponding config value
+     * Function to get the corresponding config value
      *
      * @return Value of the LocationPrivacyConfig
      */
-    fun getConfig(): Int? {
+    private fun getConfig(): Int? {
         return config.getPrivacyConfig(configKey)
     }
 
     /**
-     * The function that processes a location
+     * A guard that checks the input parameters. If there is no location or no
+     * configuration, it either returns null or the given location
+     * Otherwise it returns the result of the processor
+     *
+     * @param location A location object or null
+     * @return A manipulated location, the original location or null
+     */
+    fun process(location: Location?): Location? {
+        // return null if no location is provided
+        if (location == null) {
+            return null
+        }
+         // get config or return location if config is null
+        val config = this.getConfig() ?: return location
+
+        return this.manipulateLocation(location, config)
+    }
+
+    /**
+     * The function that manipulates a location
      *
      * @param location A location object that will be manipulated
+     * @param config Value of the LocationPrivacyConfig
      * @return A manipulated location
      */
-    abstract fun process(location: Location): Location
+    abstract fun manipulateLocation(location: Location, config: Int): Location
 }

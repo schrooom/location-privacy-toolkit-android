@@ -134,8 +134,9 @@ class LocationPrivacyToolkit(context: Context) {
         locationManager.requestLocationUpdates(provider, locationRequest, pendingIntent)
     }
 
-    private fun processLocation(location: Location): Location {
+    private fun processLocation(location: Location?): Location? {
 
+        // pipe location trough all processors
         return location
                 .let { accuracyProcessor.process(it) }
                 .let { intervalProcessor.process(it) }
