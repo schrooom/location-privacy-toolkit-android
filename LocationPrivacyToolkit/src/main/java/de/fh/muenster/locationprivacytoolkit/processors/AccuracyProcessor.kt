@@ -2,9 +2,13 @@ package de.fh.muenster.locationprivacytoolkit.processors
 
 import android.content.Context
 import android.location.*
+import android.util.Log
 import de.fh.muenster.locationprivacytoolkit.AbstractLocationProcessor
-import de.fh.muenster.locationprivacytoolkit.LocationPrivacyConfig
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyConfigKey
+import gov.nasa.worldwind.geom.LatLon
+import gov.nasa.worldwind.geom.LatLon.rhumbEndPosition
+import gov.nasa.worldwind.globes.Earth
+import gov.nasa.worldwind.globes.Globe
 
 /**
  * The AccuracyProcessor changes the accuracy of a location.
@@ -24,10 +28,19 @@ class AccuracyProcessor(context: Context): AbstractLocationProcessor(context) {
         val randomDirection = (0..359).random()
         val randomDistance =  (0..config).random()
 
-        // TODO: transform translate location by random direction and distance
+        Log.d("distance", randomDistance.toString())
 
-        location.accuracy = config.toFloat()
+        val radDistance = randomDistance / Earth.WGS84_EQUATORIAL_RADIUS
 
-        return location
+
+        val loc = LatLon.fromDegrees(location.latitude, location.longitude)
+        val pos = rhumbEndPosition(loc, Math.toRadians(randomDirection.toDouble()), radDistance)
+
+        val transformedLocation = Location(location)
+        transformedLocation.longitude = pos.longitude.degrees
+        transformedLocation.latitude = pos.latitude.degrees
+        transformedLocation.accuracy = config.toFloat()
+
+        return transformedLocation
     }
 }
