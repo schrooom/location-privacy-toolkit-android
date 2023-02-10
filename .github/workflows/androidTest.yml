@@ -25,14 +25,14 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
-          script: ./gradlew connectedDebugAndroidTest
+          script: ./gradlew connectedCheck
 
       - name: Upload Test Reports Folder
         uses: actions/upload-artifact@v2
         if: ${{ always() }} # IMPORTANT: Upload reports regardless of status
         with:
           name: reports
-          path: LocationPrivacyToolkit/build/test-results # path to where the xml test results are stored
+          path: LocationPrivacyToolkit/build/outputs/androidTest-results/connected # path to where the xml test results are stored
 
   report:
     runs-on: ubuntu-latest
