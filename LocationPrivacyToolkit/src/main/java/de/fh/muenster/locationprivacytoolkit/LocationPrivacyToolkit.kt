@@ -19,7 +19,7 @@ class LocationPrivacyToolkit(context: Context) {
 
     private val contextReference: WeakReference<Context>
     private val locationManager: LocationManager
-    private val config: LocationPrivacyConfig
+    private var config: LocationPrivacyConfig
 
     private val accuracyProcessor: AccuracyProcessor
     private val intervalProcessor: IntervalProcessor
@@ -134,7 +134,7 @@ class LocationPrivacyToolkit(context: Context) {
         locationManager.requestLocationUpdates(provider, locationRequest, pendingIntent)
     }
 
-    private fun processLocation(location: Location?): Location? {
+    fun processLocation(location: Location?): Location? {
 
         // pipe location trough all processors
         return location
