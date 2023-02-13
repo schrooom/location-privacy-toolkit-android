@@ -12,19 +12,18 @@ import android.location.*
  */
 abstract class AbstractLocationProcessor(context: Context) {
     // The configuration the subclass is processing. Must be implemented by subclass
-    abstract var configKey: LocationPrivacyConfigKey
+    abstract val configKey: LocationPrivacyConfigKey
 
     // The actual config from the LocationPrivacyConfig
-    private var config: LocationPrivacyConfig = LocationPrivacyConfig(context)
+    internal val locationPrivacyConfig: LocationPrivacyConfig = LocationPrivacyConfig(context)
 
     /**
      * Function to get the corresponding config value
      *
      * @return Value of the LocationPrivacyConfig
      */
-    private fun getConfig(): Int? {
-        return config.getPrivacyConfig(configKey)
-    }
+    private val configValue: Int?
+        get() = locationPrivacyConfig.getPrivacyConfig(configKey)
 
     /**
      * A guard that checks the input parameters. If there is no location or no
@@ -40,7 +39,7 @@ abstract class AbstractLocationProcessor(context: Context) {
             return null
         }
          // get config or return location if config is null
-        val config = this.getConfig() ?: return location
+        val config = configValue ?: return location
 
         return this.manipulateLocation(location, config)
     }

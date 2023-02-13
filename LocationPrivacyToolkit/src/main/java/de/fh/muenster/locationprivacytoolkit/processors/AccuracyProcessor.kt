@@ -8,7 +8,6 @@ import de.fh.muenster.locationprivacytoolkit.LocationPrivacyConfigKey
 import gov.nasa.worldwind.geom.LatLon
 import gov.nasa.worldwind.geom.LatLon.rhumbEndPosition
 import gov.nasa.worldwind.globes.Earth
-import gov.nasa.worldwind.globes.Globe
 
 /**
  * The AccuracyProcessor changes the accuracy of a location.
@@ -16,7 +15,7 @@ import gov.nasa.worldwind.globes.Globe
  * @param context Application context
  */
 class AccuracyProcessor(context: Context): AbstractLocationProcessor(context) {
-    override var configKey = LocationPrivacyConfigKey.accuracy
+    override val configKey = LocationPrivacyConfigKey.accuracy
 
     /**
      * The location will be moved to a random point around the actual
