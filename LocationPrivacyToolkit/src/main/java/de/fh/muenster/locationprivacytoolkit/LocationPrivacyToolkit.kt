@@ -9,6 +9,7 @@ import android.location.*
 import android.os.*
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
+import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
 import de.fh.muenster.locationprivacytoolkit.processors.AccuracyProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.IntervalProcessor
 import java.lang.ref.WeakReference
@@ -19,7 +20,7 @@ class LocationPrivacyToolkit(context: Context) {
 
     private val contextReference: WeakReference<Context>
     private val locationManager: LocationManager
-    private var config: LocationPrivacyConfig
+    private var config: LocationPrivacyConfigManager
 
     private val accuracyProcessor: AccuracyProcessor
     private val intervalProcessor: IntervalProcessor
@@ -27,7 +28,7 @@ class LocationPrivacyToolkit(context: Context) {
     init {
         contextReference = WeakReference(context)
         locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
-        config = LocationPrivacyConfig(context)
+        config = LocationPrivacyConfigManager(context)
 
         accuracyProcessor = AccuracyProcessor(context)
         intervalProcessor = IntervalProcessor(context)

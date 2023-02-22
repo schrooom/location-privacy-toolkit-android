@@ -1,13 +1,11 @@
 package de.fh.muenster.locationprivacytoolkit.processors
 
 import android.location.Location
-import android.location.LocationManager
-import android.location.LocationProvider
 import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import de.fh.muenster.locationprivacytoolkit.LocationPrivacyConfig
-import de.fh.muenster.locationprivacytoolkit.LocationPrivacyConfigKey
+import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
+import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkit
 import org.junit.Assert.*
 import org.junit.Test
@@ -23,8 +21,8 @@ class AccuracyProcessorTest {
     @Test
     fun manipulateAccuracy() {
         var appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        var config = LocationPrivacyConfig(appContext)
-        config.setPrivacyConfig(LocationPrivacyConfigKey.accuracy, 50)
+        var config = LocationPrivacyConfigManager(appContext)
+        config.setPrivacyConfig(LocationPrivacyConfig.Accuracy, 50)
 
         val lpt = LocationPrivacyToolkit(appContext)
 
@@ -42,7 +40,7 @@ class AccuracyProcessorTest {
         Log.d("New location\t\t", accuracyLocation.toString())
 
         val distance = accuracyLocation?.distanceTo(location)!!
-        val maxDist = config.getPrivacyConfig(LocationPrivacyConfigKey.accuracy)!!
+        val maxDist = config.getPrivacyConfig(LocationPrivacyConfig.Accuracy)!!
 
         Log.d("Distance\t\t", distance.toString())
 

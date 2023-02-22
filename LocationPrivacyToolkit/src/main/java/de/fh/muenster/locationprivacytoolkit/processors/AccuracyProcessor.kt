@@ -3,8 +3,7 @@ package de.fh.muenster.locationprivacytoolkit.processors
 import android.content.Context
 import android.location.*
 import android.util.Log
-import de.fh.muenster.locationprivacytoolkit.AbstractLocationProcessor
-import de.fh.muenster.locationprivacytoolkit.LocationPrivacyConfigKey
+import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 import gov.nasa.worldwind.geom.LatLon
 import gov.nasa.worldwind.geom.LatLon.rhumbEndPosition
 import gov.nasa.worldwind.globes.Earth
@@ -15,7 +14,7 @@ import gov.nasa.worldwind.globes.Earth
  * @param context Application context
  */
 class AccuracyProcessor(context: Context): AbstractLocationProcessor(context) {
-    override val configKey = LocationPrivacyConfigKey.accuracy
+    override val configKey = LocationPrivacyConfig.Accuracy
 
     /**
      * The location will be moved to a random point around the actual

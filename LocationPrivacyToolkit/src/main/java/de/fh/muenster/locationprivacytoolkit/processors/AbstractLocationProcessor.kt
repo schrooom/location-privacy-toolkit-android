@@ -1,7 +1,9 @@
-package de.fh.muenster.locationprivacytoolkit
+package de.fh.muenster.locationprivacytoolkit.processors
 
 import android.content.Context
 import android.location.*
+import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
+import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
 
 /**
  * Abstract class which processes a location
@@ -12,10 +14,10 @@ import android.location.*
  */
 abstract class AbstractLocationProcessor(context: Context) {
     // The configuration the subclass is processing. Must be implemented by subclass
-    abstract val configKey: LocationPrivacyConfigKey
+    abstract val configKey: LocationPrivacyConfig
 
     // The actual config from the LocationPrivacyConfig
-    internal val locationPrivacyConfig: LocationPrivacyConfig = LocationPrivacyConfig(context)
+    internal val locationPrivacyConfig: LocationPrivacyConfigManager = LocationPrivacyConfigManager(context)
 
     /**
      * Function to get the corresponding config value

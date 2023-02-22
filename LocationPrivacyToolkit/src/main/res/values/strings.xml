@@ -1,0 +1,12 @@
+<resources>
+    <string name="accessTitle">Access</string>
+    <string name="accessDescription">TODO: Access-Description</string>
+    <string name="accuracyTitle">Accuracy</string>
+    <string name="accuracyDescription">TODO: Accuracy-Description</string>
+    <string name="intervalTitle">Interval</string>
+    <string name="intervalDescription">TODO: Interval-Description</string>
+    <string name="visibilityTitle">Visibility</string>
+    <string name="visibilityDescription">TODO: Visibility-Description</string>
+    <string name="autoDeletionTitle">Auto-Deletion</string>
+    <string name="autoDeletionDescription">TODO: Auto-Deletion-Description</string>
+</resources>

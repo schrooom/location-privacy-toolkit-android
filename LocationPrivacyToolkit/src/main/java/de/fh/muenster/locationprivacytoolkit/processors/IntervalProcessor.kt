@@ -2,11 +2,10 @@ package de.fh.muenster.locationprivacytoolkit.processors
 
 import android.content.Context
 import android.location.*
-import de.fh.muenster.locationprivacytoolkit.AbstractLocationProcessor
-import de.fh.muenster.locationprivacytoolkit.LocationPrivacyConfigKey
+import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 
 class IntervalProcessor(context: Context): AbstractLocationProcessor(context) {
-    override val configKey = LocationPrivacyConfigKey.interval
+    override val configKey = LocationPrivacyConfig.Interval
 
     private var lastLocation: Location?
         get() = locationPrivacyConfig.getLastLocation()

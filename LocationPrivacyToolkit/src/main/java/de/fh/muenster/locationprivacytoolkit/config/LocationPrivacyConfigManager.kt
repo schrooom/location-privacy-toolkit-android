@@ -1,4 +1,4 @@
-package de.fh.muenster.locationprivacytoolkit
+package de.fh.muenster.locationprivacytoolkit.config
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -8,15 +8,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import java.lang.ref.WeakReference
 
-enum class LocationPrivacyConfigKey {
-    access,
-    accuracy,
-    interval,
-    visibility,
-    autoDeletion
-}
-
-internal class LocationPrivacyConfig(context: Context) {
+internal class LocationPrivacyConfigManager(context: Context) {
 
     private val preferences: SharedPreferences
     private val contextReference: WeakReference<Context>
@@ -27,7 +19,7 @@ internal class LocationPrivacyConfig(context: Context) {
             context.getSharedPreferences(LOCATION_PRIVACY_PREFERENCES, Context.MODE_PRIVATE)
     }
 
-    fun getPrivacyConfig(key: LocationPrivacyConfigKey): Int? {
+    fun getPrivacyConfig(key: LocationPrivacyConfig): Int? {
         return if (preferences.contains(key.name)) {
             preferences.getInt(key.name, -1)
         } else {
@@ -35,11 +27,11 @@ internal class LocationPrivacyConfig(context: Context) {
         }
     }
 
-    fun setPrivacyConfig(key: LocationPrivacyConfigKey, value: Int) {
+    fun setPrivacyConfig(key: LocationPrivacyConfig, value: Int) {
         preferences.edit { putInt(key.name, value) }
     }
 
-    fun removePrivacyConfig(key: LocationPrivacyConfigKey) {
+    fun removePrivacyConfig(key: LocationPrivacyConfig) {
         preferences.edit { remove(key.name) }
     }
 
