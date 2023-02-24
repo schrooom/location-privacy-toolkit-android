@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -49,7 +50,11 @@ class MainActivity : AppCompatActivity(), LocationListener {
                 )
                 return@setOnClickListener
             }
-            locationToolkit.requestLocationUpdates(LocationManager.FUSED_PROVIDER, 1000, 10f, this)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                locationToolkit.requestLocationUpdates(LocationManager.FUSED_PROVIDER, 1000, 10f, this)
+            } else {
+                locationToolkit.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10f, this)
+            }
             binding.startTrackingButton.isEnabled = false
             binding.stopTrackingButton.isEnabled = true
         }
