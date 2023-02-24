@@ -4,20 +4,64 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.LocationPrivacyConfigActivity">
+        android:keepScreenOn="true"
+        android:orientation="vertical">
 
+            <LinearLayout
+                android:id="@+id/settingTbt"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:text="@string/accessTitle"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/settingTbtText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/settingTbt2"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:text="@string/accuracyTitle"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/settingTbtText2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/settingTbt3"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="vertical"
+            android:text="HASLLO">
+
+            <TextView
+                android:id="@+id/settingTbtText3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/locationConfigRecyclerView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 </layout>

@@ -135,6 +135,14 @@ class LocationPrivacyToolkit(context: Context) {
         locationManager.requestLocationUpdates(provider, locationRequest, pendingIntent)
     }
 
+    fun removeUpdates(listener: LocationListener) {
+        locationManager.removeUpdates(listener)
+    }
+
+    fun removeUpdates(pendingIntent: PendingIntent) {
+        locationManager.removeUpdates(pendingIntent)
+    }
+
     fun processLocation(location: Location?): Location? {
 
         // pipe location trough all processors

@@ -9,6 +9,45 @@
         android:layout_height="match_parent"
         tools:context=".MainActivity">
 
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <Button
+                android:id="@+id/startTrackingButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:text="Start"
+                style="?android:attr/buttonBarButtonStyle" />
+
+            <Button
+                android:id="@+id/stopTrackingButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:enabled="false"
+                android:text="Stop"
+                style="?android:attr/buttonBarButtonStyle" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/locationTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="#e2e2e2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/configButton"
             android:layout_width="wrap_content"

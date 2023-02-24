@@ -8,7 +8,7 @@ import de.fh.muenster.locationprivacytoolkit.databinding.ActivityLocationPrivacy
 class LocationPrivacyConfigActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLocationPrivacyConfigBinding
-    private val configAdapter = LocationPrivacyConfigAdapter()
+    private lateinit var configAdapter: LocationPrivacyConfigAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -16,9 +16,11 @@ class LocationPrivacyConfigActivity : AppCompatActivity() {
         binding = ActivityLocationPrivacyConfigBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val keys = LocationPrivacyConfig.values().toList()
-        configAdapter.submitList(keys)
-        configAdapter.notifyItemRangeChanged(0, keys.size)
+        configAdapter = LocationPrivacyConfigAdapter().apply {
+            val keys = LocationPrivacyConfig.values().toList()
+            submitList(keys)
+            notifyItemRangeChanged(0, keys.size)
+        }
         binding.locationConfigRecyclerView.adapter = configAdapter
     }
 }
