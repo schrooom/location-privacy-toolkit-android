@@ -16,7 +16,7 @@ import java.lang.ref.WeakReference
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 
-class LocationPrivacyToolkit(context: Context) {
+class LocationPrivacyToolkit(context: Context): LocationListener {
 
     private val contextReference: WeakReference<Context>
     private val locationManager: LocationManager
@@ -24,6 +24,9 @@ class LocationPrivacyToolkit(context: Context) {
 
     private val accuracyProcessor: AccuracyProcessor
     private val intervalProcessor: IntervalProcessor
+
+    private val internalListeners: MutableList<LocationListener> = mutableListOf()
+    private val internalPendingIntents: MutableList<PendingIntent> = mutableListOf()
 
     init {
         contextReference = WeakReference(context)
@@ -40,12 +43,13 @@ class LocationPrivacyToolkit(context: Context) {
     }
 
     fun isProviderEnabled(provider: String): Boolean {
-        throw RuntimeException("Stub!")
+        return locationManager.isProviderEnabled(provider)
     }
 
     @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
     fun getLastKnownLocation(provider: String): Location? {
-        return locationManager.getLastKnownLocation(provider)
+        val lastLocation = locationManager.getLastKnownLocation(provider) ?: return null
+        return processLocation(lastLocation)
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
@@ -56,7 +60,7 @@ class LocationPrivacyToolkit(context: Context) {
         executor: Executor,
         consumer: Consumer<Location?>
     ) {
-        locationManager.getCurrentLocation(provider, cancellationSignal, executor, consumer)
+        // TODO: locationManager.getCurrentLocation(provider, cancellationSignal, executor, consumer)
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
@@ -68,7 +72,7 @@ class LocationPrivacyToolkit(context: Context) {
         executor: Executor,
         consumer: Consumer<Location?>
     ) {
-        locationManager.getCurrentLocation(provider, locationRequest, cancellationSignal, executor, consumer)
+        // TODO: locationManager.getCurrentLocation(provider, locationRequest, cancellationSignal, executor, consumer)
     }
 
     @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
@@ -78,7 +82,8 @@ class LocationPrivacyToolkit(context: Context) {
         minDistanceM: Float,
         listener: LocationListener
     ) {
-        locationManager.requestLocationUpdates(provider, minTimeMs, minDistanceM, listener)
+        internalListeners.add(listener)
+        locationManager.requestLocationUpdates(provider, minTimeMs, minDistanceM, this)
     }
 
     @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
@@ -89,7 +94,8 @@ class LocationPrivacyToolkit(context: Context) {
         listener: LocationListener,
         looper: Looper?
     ) {
-        locationManager.requestLocationUpdates(provider, minTimeMs, minDistanceM, listener, looper)
+        internalListeners.add(listener)
+        locationManager.requestLocationUpdates(provider, minTimeMs, minDistanceM, this, looper)
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
@@ -101,7 +107,8 @@ class LocationPrivacyToolkit(context: Context) {
         executor: Executor,
         listener: LocationListener
     ) {
-        locationManager.requestLocationUpdates(provider, minTimeMs, minDistanceM, executor, listener)
+        internalListeners.add(listener)
+        locationManager.requestLocationUpdates(provider, minTimeMs, minDistanceM, executor, this)
     }
 
     @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
@@ -111,7 +118,8 @@ class LocationPrivacyToolkit(context: Context) {
         minDistanceM: Float,
         pendingIntent: PendingIntent
     ) {
-        locationManager.requestLocationUpdates(provider, minTimeMs, minDistanceM, pendingIntent)
+        this.internalPendingIntents.add(pendingIntent)
+        // TODO: locationManager.requestLocationUpdates(provider, minTimeMs, minDistanceM, pendingIntent)
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
@@ -122,7 +130,8 @@ class LocationPrivacyToolkit(context: Context) {
         executor: Executor,
         listener: LocationListener
     ) {
-        locationManager.requestLocationUpdates(provider, locationRequest, executor, listener)
+        internalListeners.add(listener)
+        locationManager.requestLocationUpdates(provider, locationRequest, executor, this)
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
@@ -132,22 +141,36 @@ class LocationPrivacyToolkit(context: Context) {
         locationRequest: LocationRequest,
         pendingIntent: PendingIntent
     ) {
-        locationManager.requestLocationUpdates(provider, locationRequest, pendingIntent)
+        this.internalPendingIntents.add(pendingIntent)
+        // TODO: locationManager.requestLocationUpdates(provider, locationRequest, pendingIntent)
     }
 
     fun removeUpdates(listener: LocationListener) {
-        locationManager.removeUpdates(listener)
+        internalListeners.remove(listener)
+        if (internalListeners.isEmpty()) {
+            locationManager.removeUpdates(this)
+        }
     }
 
     fun removeUpdates(pendingIntent: PendingIntent) {
-        locationManager.removeUpdates(pendingIntent)
+        internalPendingIntents.remove(pendingIntent)
+        if (internalPendingIntents.isEmpty()) {
+            locationManager.removeUpdates(pendingIntent)
+        }
     }
 
     fun processLocation(location: Location?): Location? {
-
         // pipe location trough all processors
         return location
                 .let { accuracyProcessor.process(it) }
                 .let { intervalProcessor.process(it) }
+    }
+
+    // LocationListener
+
+    override fun onLocationChanged(l: Location) {
+        val processedLocation = processLocation(l) ?: return
+        internalListeners.forEach { it.onLocationChanged(processedLocation) }
+        internalPendingIntents.forEach { /* TODO */ }
     }
 }
