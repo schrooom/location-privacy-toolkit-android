@@ -26,4 +26,27 @@ enum class LocationPrivacyConfig {
             Visibility -> R.string.visibilityDescription
             AutoDeletion -> R.string.autoDeletionDescription
         }
+
+    val defaultValue: Int
+        get() = when(this) {
+            Access -> 0
+            Accuracy -> 0
+            Interval -> 0
+            Visibility -> 0
+            AutoDeletion -> 0
+        }
+
+    val userInterface: LocationPrivacyConfigInterface
+        get() = when(this) {
+            Access -> LocationPrivacyConfigInterface.Toggle
+            Accuracy -> LocationPrivacyConfigInterface.Slider
+            Interval -> LocationPrivacyConfigInterface.Slider
+            Visibility -> LocationPrivacyConfigInterface.Slider
+            AutoDeletion -> LocationPrivacyConfigInterface.Slider
+        }
+}
+
+enum class LocationPrivacyConfigInterface {
+    Toggle,
+    Slider
 }

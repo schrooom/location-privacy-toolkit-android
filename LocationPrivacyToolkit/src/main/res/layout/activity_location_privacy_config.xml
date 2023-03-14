@@ -11,57 +11,22 @@
         android:keepScreenOn="true"
         android:orientation="vertical">
 
-            <LinearLayout
-                android:id="@+id/settingTbt"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:text="@string/accessTitle"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/settingTbtText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/settingTbt2"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:text="@string/accuracyTitle"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/settingTbtText2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
-
-
-        <LinearLayout
-            android:id="@+id/settingTbt3"
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:orientation="vertical"
-            android:text="HASLLO">
-
-            <TextView
-                android:id="@+id/settingTbtText3"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
+            android:layout_height="wrap_content"
+            android:text="DEBUG:"
+            android:background="#cfcfcf"/>
+        <TextView
+            android:id="@+id/debugText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#cfcfcf"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/locationConfigRecyclerView"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"/>
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
 </layout>
