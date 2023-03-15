@@ -59,6 +59,7 @@ class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAd
                     if (isChecked) 1 else 0
                 )
                 if (isLocationAccessConfig) {
+                    listener.refreshRecyclerView()
                 }
             }
             // enable, if location-access is enabled or if this is the button, to toggle location-access
@@ -101,6 +102,7 @@ class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAd
     interface LocationPrivacyConfigAdapterListener {
         fun onPrivacyConfigChanged(config: LocationPrivacyConfig, value: Int)
         fun getPrivacyConfigValue(config: LocationPrivacyConfig): Int
+        fun refreshRecyclerView()
     }
 
     companion object {

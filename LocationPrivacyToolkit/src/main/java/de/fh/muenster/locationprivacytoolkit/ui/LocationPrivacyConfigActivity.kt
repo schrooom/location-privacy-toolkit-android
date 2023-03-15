@@ -1,7 +1,8 @@
 package de.fh.muenster.locationprivacytoolkit.ui
 
-import androidx.appcompat.app.AppCompatActivity
+import android.annotation.SuppressLint
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
 import de.fh.muenster.locationprivacytoolkit.databinding.ActivityLocationPrivacyConfigBinding
@@ -37,5 +38,9 @@ class LocationPrivacyConfigActivity : AppCompatActivity(), LocationPrivacyConfig
         return configManager.getPrivacyConfig(config) ?: config.defaultValue
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    override fun refreshRecyclerView() {
+        configAdapter.notifyDataSetChanged()
+    }
 
 }
