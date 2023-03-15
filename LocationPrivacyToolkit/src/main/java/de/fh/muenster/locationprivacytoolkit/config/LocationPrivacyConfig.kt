@@ -36,17 +36,63 @@ enum class LocationPrivacyConfig {
             AutoDeletion -> 0
         }
 
+    val values: Array<Int>
+        get() = when(this) {
+            Access -> arrayOf(0, 1)
+            Accuracy -> arrayOf(1000, 500, 100, 0)
+            Interval -> arrayOf(1000, 600, 60, 0)
+            Visibility -> arrayOf(0, 1, 2, 3)
+            AutoDeletion -> arrayOf(1000, 600, 60, 0)
+        }
+
     val userInterface: LocationPrivacyConfigInterface
         get() = when(this) {
-            Access -> LocationPrivacyConfigInterface.Toggle
+            Access -> LocationPrivacyConfigInterface.Switch
             Accuracy -> LocationPrivacyConfigInterface.Slider
             Interval -> LocationPrivacyConfigInterface.Slider
             Visibility -> LocationPrivacyConfigInterface.Slider
             AutoDeletion -> LocationPrivacyConfigInterface.Slider
         }
+
+    val range: IntRange
+        get() = IntRange(0, values.size - 1)
+
+    fun formatLabel(value: Int): String {
+        return when(this) {
+            Access -> ""
+            Accuracy -> "${value}m"
+            Interval -> "${value}s"
+            Visibility -> {
+                when(value) {
+                    1 -> "Friends"
+                    2 -> "Contacts"
+                    3 -> "Everyone"
+                    else -> "None"
+                }
+            }
+            AutoDeletion -> "${value}s"
+        }
+    }
+    fun indexToValue(indexValue: Float): Int? {
+        val configValues = this.values
+        if (configValues.isNotEmpty()) {
+            val index = indexValue.toInt()
+            return configValues[index]
+        }
+        return null
+    }
+
+    fun valueToIndex(value: Int): Int? {
+        val index = this.values.indexOf(value)
+        if (index >= 0) {
+            return index
+        }
+        return null
+    }
+
 }
 
 enum class LocationPrivacyConfigInterface {
-    Toggle,
+    Switch,
     Slider
 }
