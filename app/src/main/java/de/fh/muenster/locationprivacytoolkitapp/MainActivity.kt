@@ -19,8 +19,11 @@ import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.style.layers.CircleLayer
+import com.mapbox.mapboxsdk.style.layers.FillLayer
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+import com.mapbox.turf.TurfConstants.UNIT_METERS
+import com.mapbox.turf.TurfTransformation
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkit
 import de.fh.muenster.locationprivacytoolkit.ui.LocationPrivacyConfigActivity
 import de.fh.muenster.locationprivacytoolkitapp.databinding.ActivityMainBinding
@@ -41,11 +44,11 @@ class MainActivity : AppCompatActivity(), LocationListener {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.configButton.setOnClickListener { view: View ->
+        binding.configButton.setOnClickListener {
             startActivity(Intent(this, LocationPrivacyConfigActivity::class.java))
         }
 
-        binding.startTrackingButton.setOnClickListener { view: View ->
+        binding.startTrackingButton.setOnClickListener {
             if (!checkPermissions()) {
                 return@setOnClickListener
             }
@@ -58,7 +61,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
             binding.stopTrackingButton.isEnabled = true
         }
 
-        binding.stopTrackingButton.setOnClickListener { view: View ->
+        binding.stopTrackingButton.setOnClickListener {
             locationToolkit.removeUpdates(this)
             binding.startTrackingButton.isEnabled = true
             binding.stopTrackingButton.isEnabled = false
@@ -136,21 +139,35 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private fun addLocationToMap(map: MapboxMap, l: Location) {
         map.getStyle { style ->
             val newLocationJson = Point.fromLngLat(l.longitude, l.latitude)
-            val oldSource = style.getSource(POSITION_SOURCE_ID) as? GeoJsonSource
-            if (oldSource != null) {
-                oldSource.setGeoJson(newLocationJson)
+            val oldLocationSource = style.getSource(POSITION_SOURCE_ID) as? GeoJsonSource
+            if (oldLocationSource != null) {
+                oldLocationSource.setGeoJson(newLocationJson)
             } else {
                 style.addSource(GeoJsonSource(POSITION_SOURCE_ID).apply {
                     setGeoJson(newLocationJson)
                 })
             }
+            val haloData = TurfTransformation.circle(Point.fromLngLat(l.longitude, l.latitude), l.accuracy.toDouble(), UNIT_METERS)
+            val oldHaloSource = style.getSource(POSITION_HALO_SOURCE_ID) as? GeoJsonSource
+            if (oldHaloSource != null) {
+                oldHaloSource.setGeoJson(haloData)
+            } else {
+                style.addSource(GeoJsonSource(POSITION_HALO_SOURCE_ID).apply {
+                    setGeoJson(haloData)
+                })
+            }
             if (style.getLayer(POSITION_LAYER_ID) == null) {
-                val layer = CircleLayer(POSITION_LAYER_ID, POSITION_SOURCE_ID).withProperties(
+                val positionLayer = CircleLayer(POSITION_LAYER_ID, POSITION_SOURCE_ID).withProperties(
                     PropertyFactory.circleRadius(5f),
                     PropertyFactory.circleColor(Color.RED),
                     PropertyFactory.circleOpacity(0.75f)
                 )
-                style.addLayer(layer)
+                style.addLayer(positionLayer)
+                val haloLayer = FillLayer(POSITION_HALO_LAYER_ID, POSITION_HALO_SOURCE_ID).withProperties(
+                    PropertyFactory.fillColor(Color.RED),
+                    PropertyFactory.fillOpacity(0.1f)
+                )
+                style.addLayer(haloLayer)
             }
         }
     }
@@ -176,6 +193,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
         private const val POSITION_SOURCE_ID = "last_location_source_id"
         private const val POSITION_LAYER_ID = "last_location_layer_id"
         private const val POSITION_ZOOM = 13.0
+        private const val POSITION_HALO_SOURCE_ID = "last_location_halo_source_id"
+        private const val POSITION_HALO_LAYER_ID = "last_location_halo_layer_id"
 
         // roughly Münster Westf.
         private const val INITIAL_LATITUDE = 51.961563
