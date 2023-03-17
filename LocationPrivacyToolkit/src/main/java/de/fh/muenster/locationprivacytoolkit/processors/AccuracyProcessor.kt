@@ -21,8 +21,11 @@ class AccuracyProcessor(context: Context): AbstractLocationProcessor(context) {
      * point and the `accuracy` metadata will be changed as well
      */
     override fun manipulateLocation(location: Location, config: Int): Location {
-        // TODO: translate config to actual desired accuracy in meters
+        if (location.accuracy >= config) {
+            return location
+        }
 
+        // TODO: translate config to actual desired accuracy in meters
         val randomDirection = (0..359).random()
         val randomDistance =  (0..config).random()
 
