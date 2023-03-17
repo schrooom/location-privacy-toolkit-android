@@ -160,7 +160,7 @@ class LocationPrivacyToolkit(context: Context): LocationListener {
     }
 
     fun processLocation(location: Location?): Location? {
-        // pipe location trough all processors
+        // pipe location through all processors
         return location
                 .let { accuracyProcessor.process(it) }
                 .let { intervalProcessor.process(it) }
