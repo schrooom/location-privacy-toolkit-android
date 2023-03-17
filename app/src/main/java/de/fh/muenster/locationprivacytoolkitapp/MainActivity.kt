@@ -11,7 +11,6 @@ import android.location.LocationManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import androidx.core.app.ActivityCompat
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
@@ -185,7 +184,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         val lat = BigDecimal(l.latitude).setScale(5, RoundingMode.HALF_EVEN)
         val lon = BigDecimal(l.longitude).setScale(5, RoundingMode.HALF_EVEN)
         val acc = BigDecimal(l.accuracy.toDouble()).setScale(1, RoundingMode.HALF_EVEN)
-        val locationString = "[${date}] $lat} / ${lon} (${acc}m)"
+        val locationString = "[${date}] $lat / $lon (${acc}m)"
         val addLineString = if (binding.locationTextView.text.isBlank()) "" else "\n"
         val locationDebugText = "${binding.locationTextView.text}${addLineString}${locationString}"
         binding.locationTextView.text = locationDebugText
@@ -196,14 +195,14 @@ class MainActivity : AppCompatActivity(), LocationListener {
         const val PERMISSION_REQUEST_CURRENT_POSITION = 801
         private const val POSITION_SOURCE_ID = "last_location_source_id"
         private const val POSITION_LAYER_ID = "last_location_layer_id"
-        private const val POSITION_ZOOM = 13.0
+        private const val POSITION_ZOOM = 15.0
         private const val POSITION_HALO_SOURCE_ID = "last_location_halo_source_id"
         private const val POSITION_HALO_LAYER_ID = "last_location_halo_layer_id"
 
         // roughly Münster Westf.
         private const val INITIAL_LATITUDE = 51.961563
         private const val INITIAL_LONGITUDE = 7.628202
-        private const val INITIAL_ZOOM = 8.0
+        private const val INITIAL_ZOOM = 10.0
 
         // replace with proper style, if available
         private const val TILE_SERVER = "https://demotiles.maplibre.org/style.json"
