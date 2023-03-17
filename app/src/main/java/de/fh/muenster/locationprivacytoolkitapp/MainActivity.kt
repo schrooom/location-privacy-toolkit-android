@@ -60,12 +60,20 @@ class MainActivity : AppCompatActivity(), LocationListener {
             }
             binding.startTrackingButton.isEnabled = false
             binding.stopTrackingButton.isEnabled = true
+            binding.clearTrackingButton.isEnabled = false
         }
 
         binding.stopTrackingButton.setOnClickListener {
             locationToolkit.removeUpdates(this)
             binding.startTrackingButton.isEnabled = true
             binding.stopTrackingButton.isEnabled = false
+            binding.clearTrackingButton.isEnabled = binding.locationTextView.text.isNotBlank()
+        }
+
+        binding.clearTrackingButton.setOnClickListener {
+            resetMap()
+            binding.locationTextView.text = ""
+            binding.clearTrackingButton.isEnabled = false
         }
 
         binding.mapView.onCreate(savedInstanceState)
@@ -149,11 +157,11 @@ class MainActivity : AppCompatActivity(), LocationListener {
                 })
             }
             val haloData = TurfTransformation.circle(Point.fromLngLat(l.longitude, l.latitude), l.accuracy.toDouble(), UNIT_METERS)
-            val oldHaloSource = style.getSource(POSITION_HALO_SOURCE_ID) as? GeoJsonSource
+            val oldHaloSource = style.getSource(HALO_SOURCE_ID) as? GeoJsonSource
             if (oldHaloSource != null) {
                 oldHaloSource.setGeoJson(haloData)
             } else {
-                style.addSource(GeoJsonSource(POSITION_HALO_SOURCE_ID).apply {
+                style.addSource(GeoJsonSource(HALO_SOURCE_ID).apply {
                     setGeoJson(haloData)
                 })
             }
@@ -164,7 +172,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
                     PropertyFactory.circleOpacity(0.75f)
                 )
                 style.addLayer(positionLayer)
-                val haloLayer = FillLayer(POSITION_HALO_LAYER_ID, POSITION_HALO_SOURCE_ID).withProperties(
+                val haloLayer = FillLayer(HALO_LAYER_ID, HALO_SOURCE_ID).withProperties(
                     PropertyFactory.fillColor(Color.RED),
                     PropertyFactory.fillOpacity(0.1f)
                 )
@@ -176,6 +184,19 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private fun centerMapTo(map: MapboxMap, lat: Double, lon: Double, zoom: Double = POSITION_ZOOM) {
         val camera = CameraUpdateFactory.newLatLngZoom(LatLng(lat, lon), zoom)
         map.easeCamera(camera)
+    }
+
+    private fun resetMap() {
+        binding.mapView.getMapAsync { map ->
+            map.getStyle { style ->
+                style.removeLayer(POSITION_LAYER_ID)
+                style.removeLayer(HALO_LAYER_ID)
+                style.removeLayer(LINE_LAYER_ID)
+                style.removeSource(POSITION_SOURCE_ID)
+                style.removeSource(HALO_SOURCE_ID)
+                style.removeSource(LINE_SOURCE_ID)
+            }
+        }
     }
 
     // LocationListener
@@ -193,12 +214,14 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
     companion object {
         const val PERMISSION_REQUEST_CURRENT_POSITION = 801
-        private const val POSITION_SOURCE_ID = "last_location_source_id"
-        private const val POSITION_LAYER_ID = "last_location_layer_id"
-        private const val POSITION_ZOOM = 15.0
-        private const val POSITION_HALO_SOURCE_ID = "last_location_halo_source_id"
-        private const val POSITION_HALO_LAYER_ID = "last_location_halo_layer_id"
+        private const val POSITION_SOURCE_ID = "location_source_id"
+        private const val POSITION_LAYER_ID = "location_layer_id"
+        private const val HALO_SOURCE_ID = "halo_source_id"
+        private const val HALO_LAYER_ID = "halo_layer_id"
+        private const val LINE_SOURCE_ID = "line_source_id"
+        private const val LINE_LAYER_ID = "line_layer_id"
 
+        private const val POSITION_ZOOM = 15.0
         // roughly Münster Westf.
         private const val INITIAL_LATITUDE = 51.961563
         private const val INITIAL_LONGITUDE = 7.628202

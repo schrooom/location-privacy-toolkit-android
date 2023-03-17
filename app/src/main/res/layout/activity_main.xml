@@ -25,6 +25,8 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="4dp"
                 android:text="Start"
+                android:drawableTop="@drawable/ic_play"
+                android:drawableTint="@drawable/button_tint"
                 style="?android:attr/buttonBarButtonStyle" />
 
             <Button
@@ -34,6 +36,19 @@
                 android:layout_margin="4dp"
                 android:enabled="false"
                 android:text="Stop"
+                android:drawableTop="@drawable/ic_stop"
+                android:drawableTint="@drawable/button_tint"
+                style="?android:attr/buttonBarButtonStyle" />
+
+            <Button
+                android:id="@+id/clearTrackingButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:enabled="false"
+                android:text="Clear"
+                android:drawableTop="@drawable/ic_delete"
+                android:drawableTint="@drawable/button_tint"
                 style="?android:attr/buttonBarButtonStyle" />
         </LinearLayout>
 
@@ -73,7 +88,7 @@
             android:layout_marginBottom="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/baseline_settings_24" />
+            app:srcCompat="@drawable/ic_settings" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
