@@ -27,6 +27,8 @@ import com.mapbox.turf.TurfTransformation
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkit
 import de.fh.muenster.locationprivacytoolkit.ui.LocationPrivacyConfigActivity
 import de.fh.muenster.locationprivacytoolkitapp.databinding.ActivityMainBinding
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -179,12 +181,14 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
     // LocationListener
     override fun onLocationChanged(l: Location) {
-        val locationString = "[${dateFormat.format(Date(l.time))}] ${l.latitude} / ${l.longitude} (${l.accuracy}m)"
-        if (binding.locationTextView.text.isBlank()) {
-            binding.locationTextView.text = "${binding.locationTextView.text}${locationString}"
-        } else {
-            binding.locationTextView.text = "${binding.locationTextView.text}\n${locationString}"
-        }
+        val date = dateFormat.format(Date(l.time))
+        val lat = BigDecimal(l.latitude).setScale(5, RoundingMode.HALF_EVEN)
+        val lon = BigDecimal(l.longitude).setScale(5, RoundingMode.HALF_EVEN)
+        val acc = BigDecimal(l.accuracy.toDouble()).setScale(1, RoundingMode.HALF_EVEN)
+        val locationString = "[${date}] $lat} / ${lon} (${acc}m)"
+        val addLineString = if (binding.locationTextView.text.isBlank()) "" else "\n"
+        val locationDebugText = "${binding.locationTextView.text}${addLineString}${locationString}"
+        binding.locationTextView.text = locationDebugText
         processLocation(l)
     }
 
