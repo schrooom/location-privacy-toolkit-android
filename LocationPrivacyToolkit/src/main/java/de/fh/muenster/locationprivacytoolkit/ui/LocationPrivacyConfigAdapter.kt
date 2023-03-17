@@ -10,6 +10,7 @@ import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigInterface
 import de.fh.muenster.locationprivacytoolkit.databinding.ListItemLocationPrivacyConfigBinding
 
+
 class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAdapterListener): ListAdapter<LocationPrivacyConfig, LocationPrivacyConfigAdapter.LocationPrivacyConfigViewHolder>(
     diffCallback
 ) {
@@ -62,6 +63,7 @@ class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAd
                     listener.refreshRecyclerView()
                 }
             }
+            dataBinding.root.setOnClickListener { dataBinding.locationConfigSwitch.toggle() }
             // enable, if location-access is enabled or if this is the button, to toggle location-access
             dataBinding.locationConfigSwitch.isEnabled = hasLocationAccess || isLocationAccessConfig
             dataBinding.locationConfigSwitch.visibility = View.VISIBLE
