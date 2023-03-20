@@ -17,7 +17,7 @@ class IntervalProcessor(context: Context): AbstractLocationProcessor(context) {
             locationPrivacyConfig.setLastLocation(value)
         }
 
-    override fun manipulateLocation(location: Location, config: Int): Location {
+    override fun manipulateLocation(location: Location, config: Int): Location? {
         val cachedLocation = lastLocation
         if (config > 0 && cachedLocation != null && cachedLocation.time > 0) {
             val timeDiffToLastLocation = location.time - cachedLocation.time

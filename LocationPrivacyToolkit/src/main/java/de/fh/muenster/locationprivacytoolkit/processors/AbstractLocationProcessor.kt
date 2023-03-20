@@ -53,5 +53,5 @@ abstract class AbstractLocationProcessor(context: Context) {
      * @param config Value of the LocationPrivacyConfig
      * @return A manipulated location
      */
-    abstract fun manipulateLocation(location: Location, config: Int): Location
+    abstract fun manipulateLocation(location: Location, config: Int): Location?
 }

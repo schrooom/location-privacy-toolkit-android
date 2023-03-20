@@ -10,6 +10,7 @@ import android.os.*
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
+import de.fh.muenster.locationprivacytoolkit.processors.AccessProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.AccuracyProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.IntervalProcessor
 import java.lang.ref.WeakReference
@@ -18,24 +19,16 @@ import java.util.function.Consumer
 
 class LocationPrivacyToolkit(context: Context): LocationListener {
 
-    private val contextReference: WeakReference<Context>
-    private val locationManager: LocationManager
-    private var config: LocationPrivacyConfigManager
+    private val contextReference = WeakReference(context)
+    private val locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
+    private var config = LocationPrivacyConfigManager(context)
 
-    private val accuracyProcessor: AccuracyProcessor
-    private val intervalProcessor: IntervalProcessor
+    private val accessProcessor = AccessProcessor(context)
+    private val accuracyProcessor = AccuracyProcessor(context)
+    private val intervalProcessor = IntervalProcessor(context)
 
     private val internalListeners: MutableList<LocationListener> = mutableListOf()
     private val internalPendingIntents: MutableList<PendingIntent> = mutableListOf()
-
-    init {
-        contextReference = WeakReference(context)
-        locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
-        config = LocationPrivacyConfigManager(context)
-
-        accuracyProcessor = AccuracyProcessor(context)
-        intervalProcessor = IntervalProcessor(context)
-    }
 
     @RequiresApi(Build.VERSION_CODES.P)
     fun isLocationEnabled(): Boolean {
@@ -162,6 +155,7 @@ class LocationPrivacyToolkit(context: Context): LocationListener {
     fun processLocation(location: Location?): Location? {
         // pipe location through all processors
         return location
+                .let { accessProcessor.process(it) }
                 .let { accuracyProcessor.process(it) }
                 .let { intervalProcessor.process(it) }
     }
