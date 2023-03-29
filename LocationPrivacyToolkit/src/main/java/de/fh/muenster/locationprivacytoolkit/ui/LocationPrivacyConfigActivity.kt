@@ -1,7 +1,12 @@
 package de.fh.muenster.locationprivacytoolkit.ui
 
+import android.Manifest.permission.*
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
@@ -33,6 +38,28 @@ class LocationPrivacyConfigActivity : AppCompatActivity(), LocationPrivacyConfig
             RecyclerView.VERTICAL
         )
         binding.locationConfigRecyclerView.addItemDecoration(dividerItemDecoration)
+
+        binding.locationConfigSystemSettingsButton.setOnClickListener {
+            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+            intent.data = Uri.fromParts("package", packageName, null)
+            startActivity(intent)
+        }
+
+        val hasFinePermission = checkSelfPermission(ACCESS_FINE_LOCATION)
+        val hasCoarsePermission = checkSelfPermission(ACCESS_COARSE_LOCATION)
+        binding.locationConfigSystemAccessValue.text = when (true) {
+            (hasFinePermission == PackageManager.PERMISSION_GRANTED) -> "precise"
+            (hasCoarsePermission == PackageManager.PERMISSION_GRANTED) -> "coarse"
+            (hasCoarsePermission == PackageManager.PERMISSION_DENIED && hasFinePermission == PackageManager.PERMISSION_DENIED) -> "denied"
+            else -> "unset"
+        }
+
+        val hasBackgroundPermission = checkSelfPermission(ACCESS_BACKGROUND_LOCATION)
+        binding.locationConfigSystemBackgroundValue.text = if (hasBackgroundPermission == PackageManager.PERMISSION_GRANTED) {
+            "yes"
+        } else {
+            "no"
+        }
     }
 
     // LocationPrivacyConfigAdapterListener
