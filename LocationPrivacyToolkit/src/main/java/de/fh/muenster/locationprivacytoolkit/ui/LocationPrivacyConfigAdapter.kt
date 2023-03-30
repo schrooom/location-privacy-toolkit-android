@@ -71,8 +71,8 @@ class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAd
 
         private fun initSlider(config: LocationPrivacyConfig, hasLocationAccess: Boolean) {
             val range = config.range
-            dataBinding.locationConfigSlider.valueFrom = range.start.toFloat()
-            dataBinding.locationConfigSlider.valueTo = range.endInclusive.toFloat()
+            dataBinding.locationConfigSlider.valueFrom = range.first.toFloat()
+            dataBinding.locationConfigSlider.valueTo = range.last.toFloat()
             dataBinding.locationConfigSlider.stepSize = 1f
             dataBinding.locationConfigSlider.isTickVisible = true
             dataBinding.locationConfigSlider.setLabelFormatter { value ->
@@ -85,6 +85,7 @@ class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAd
             }
             val currentValue = config.valueToIndex(listener.getPrivacyConfigValue(config))
             val initialValue = (currentValue ?: config.defaultValue).toFloat()
+            updateCurrentState(config, config.indexToValue(initialValue))
             dataBinding.locationConfigSlider.value = initialValue
             dataBinding.locationConfigSlider.addOnChangeListener { _, value, _ ->
                 val configValue = config.indexToValue(value)
@@ -93,11 +94,17 @@ class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAd
                         config,
                         configValue
                     )
+                    updateCurrentState(config, configValue)
                 }
             }
             // enable, if location-access is enabled
             dataBinding.locationConfigSlider.isEnabled = hasLocationAccess
             dataBinding.locationConfigSlider.visibility = View.VISIBLE
+            dataBinding.locationConfigChip.visibility = View.VISIBLE
+        }
+
+        private fun updateCurrentState(config: LocationPrivacyConfig, value: Int?) {
+            dataBinding.locationConfigChip.text = config.formatLabel(value ?: config.defaultValue)
         }
     }
 
