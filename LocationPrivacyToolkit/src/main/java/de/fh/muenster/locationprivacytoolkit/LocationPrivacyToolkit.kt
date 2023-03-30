@@ -9,17 +9,17 @@ import android.location.*
 import android.os.*
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
+import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
 import de.fh.muenster.locationprivacytoolkit.processors.AccessProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.AccuracyProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.IntervalProcessor
-import java.lang.ref.WeakReference
+import kotlinx.coroutines.*
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 
-class LocationPrivacyToolkit(context: Context): LocationListener {
+class LocationPrivacyToolkit(context: Context, private val listener: LocationPrivacyToolkitListener): LocationListener {
 
-    private val contextReference = WeakReference(context)
     private val locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
     private var config = LocationPrivacyConfigManager(context)
 
@@ -29,6 +29,12 @@ class LocationPrivacyToolkit(context: Context): LocationListener {
 
     private val internalListeners: MutableList<LocationListener> = mutableListOf()
     private val internalPendingIntents: MutableList<PendingIntent> = mutableListOf()
+
+    private val autoDeletionTimeSeconds: Int?
+        get() {
+            val time = config.getPrivacyConfig(LocationPrivacyConfig.AutoDeletion) ?: return null
+            return if (time <= 0) null else time
+        }
 
     @RequiresApi(Build.VERSION_CODES.P)
     fun isLocationEnabled(): Boolean {
@@ -148,7 +154,7 @@ class LocationPrivacyToolkit(context: Context): LocationListener {
     fun removeUpdates(pendingIntent: PendingIntent) {
         internalPendingIntents.remove(pendingIntent)
         if (internalPendingIntents.isEmpty()) {
-            locationManager.removeUpdates(pendingIntent)
+            // TODO: locationManager.removeUpdates(pendingIntent)
         }
     }
 
@@ -166,5 +172,17 @@ class LocationPrivacyToolkit(context: Context): LocationListener {
         val processedLocation = processLocation(l) ?: return
         internalListeners.forEach { it.onLocationChanged(processedLocation) }
         internalPendingIntents.forEach { /* TODO */ }
+
+        val autoDeletionTime = autoDeletionTimeSeconds ?: return
+        MainScope().launch {
+            delay(autoDeletionTime * 1000L)
+            listener.onRemoveLocation(processedLocation)
+        }
     }
+}
+
+interface LocationPrivacyToolkitListener {
+    fun onRemoveLocation(l: Location)
+    fun onRemoveLocation(timestamp: Long)
+    fun onRemoveLocationRange(fromTimestamp: Long, toTimestamp: Long)
 }

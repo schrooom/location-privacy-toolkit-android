@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.widget.ScrollView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.google.android.material.snackbar.Snackbar
 import com.mapbox.geojson.MultiPoint
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
@@ -24,6 +25,7 @@ import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.turf.TurfConstants.UNIT_METERS
 import com.mapbox.turf.TurfTransformation
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkit
+import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkitListener
 import de.fh.muenster.locationprivacytoolkit.ui.LocationPrivacyConfigActivity
 import de.fh.muenster.locationprivacytoolkitapp.databinding.ActivityMainBinding
 import java.math.BigDecimal
@@ -31,7 +33,7 @@ import java.math.RoundingMode
 import java.text.SimpleDateFormat
 import java.util.*
 
-class MainActivity : AppCompatActivity(), LocationListener {
+class MainActivity : AppCompatActivity(), LocationListener, LocationPrivacyToolkitListener {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var locationToolkit: LocationPrivacyToolkit
@@ -43,7 +45,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Mapbox.getInstance(this)
-        locationToolkit = LocationPrivacyToolkit(applicationContext)
+        locationToolkit = LocationPrivacyToolkit(applicationContext, this)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -160,24 +162,13 @@ class MainActivity : AppCompatActivity(), LocationListener {
     }
 
     private fun addLocationToMap(map: MapboxMap, l: Location) {
+        updateMapLocations()
         map.getStyle { style ->
-            val newLocationPoints =
-                lastLocations.map { loc -> Point.fromLngLat(loc.longitude, loc.latitude) }
-            val newLocationMultiPoint = MultiPoint.fromLngLats(newLocationPoints)
-            val oldLocationSource = style.getSource(POSITION_SOURCE_ID) as? GeoJsonSource
-            if (oldLocationSource != null) {
-                oldLocationSource.setGeoJson(newLocationMultiPoint)
-            } else {
-                style.addSource(GeoJsonSource(POSITION_SOURCE_ID).apply {
-                    setGeoJson(newLocationMultiPoint)
-                })
-            }
             val haloPolygon = TurfTransformation.circle(
                 Point.fromLngLat(l.longitude, l.latitude),
                 l.accuracy.toDouble(),
                 UNIT_METERS
             )
-            //val haloMultiPolygon = MultiPolygon.fromPolygons(haloPolygons)
             val oldHaloSource = style.getSource(HALO_SOURCE_ID) as? GeoJsonSource
             if (oldHaloSource != null) {
                 oldHaloSource.setGeoJson(haloPolygon)
@@ -186,27 +177,45 @@ class MainActivity : AppCompatActivity(), LocationListener {
                     setGeoJson(haloPolygon)
                 })
             }
-            if (style.getLayer(POSITION_LAYER_ID) == null) {
-                val positionLayer =
-                    CircleLayer(POSITION_LAYER_ID, POSITION_SOURCE_ID).withProperties(
-                        PropertyFactory.circleRadius(6f),
-                        PropertyFactory.circleColor(Color.RED),
-                        PropertyFactory.circleOpacity(0.75f)
+        }
+    }
+
+    private fun updateMapLocations() {
+        binding.mapView.getMapAsync { map ->
+            map.getStyle { style ->
+                val newLocationPoints =
+                    lastLocations.map { loc -> Point.fromLngLat(loc.longitude, loc.latitude) }
+                val newLocationMultiPoint = MultiPoint.fromLngLats(newLocationPoints)
+                val oldLocationSource = style.getSource(POSITION_SOURCE_ID) as? GeoJsonSource
+                if (oldLocationSource != null) {
+                    oldLocationSource.setGeoJson(newLocationMultiPoint)
+                } else {
+                    style.addSource(GeoJsonSource(POSITION_SOURCE_ID).apply {
+                        setGeoJson(newLocationMultiPoint)
+                    })
+                }
+                if (style.getLayer(POSITION_LAYER_ID) == null) {
+                    val positionLayer =
+                        CircleLayer(POSITION_LAYER_ID, POSITION_SOURCE_ID).withProperties(
+                            PropertyFactory.circleRadius(6f),
+                            PropertyFactory.circleColor(Color.RED),
+                            PropertyFactory.circleOpacity(0.75f)
+                        )
+                    style.addLayer(positionLayer)
+                    val haloLayer = FillLayer(HALO_LAYER_ID, HALO_SOURCE_ID).withProperties(
+                        PropertyFactory.fillColor(Color.RED),
+                        PropertyFactory.fillOpacity(0.1f),
                     )
-                style.addLayer(positionLayer)
-                val haloLayer = FillLayer(HALO_LAYER_ID, HALO_SOURCE_ID).withProperties(
-                    PropertyFactory.fillColor(Color.RED),
-                    PropertyFactory.fillOpacity(0.1f),
-                )
-                style.addLayerBelow(haloLayer, POSITION_LAYER_ID)
-                val lineLayer = LineLayer(LINE_LAYER_ID, POSITION_SOURCE_ID).withProperties(
-                    PropertyFactory.lineColor(Color.BLUE),
-                    PropertyFactory.lineOpacity(0.5f),
-                    PropertyFactory.lineWidth(4f),
-                    PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
-                    PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND)
-                )
-                style.addLayerBelow(lineLayer, HALO_LAYER_ID)
+                    style.addLayerBelow(haloLayer, POSITION_LAYER_ID)
+                    val lineLayer = LineLayer(LINE_LAYER_ID, POSITION_SOURCE_ID).withProperties(
+                        PropertyFactory.lineColor(Color.BLUE),
+                        PropertyFactory.lineOpacity(0.5f),
+                        PropertyFactory.lineWidth(4f),
+                        PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
+                        PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND)
+                    )
+                    style.addLayerBelow(lineLayer, HALO_LAYER_ID)
+                }
             }
         }
     }
@@ -246,6 +255,10 @@ class MainActivity : AppCompatActivity(), LocationListener {
         }, 0)
     }
 
+    private fun showMessage(message: String) {
+        Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
+    }
+
     // LocationListener
     override fun onLocationChanged(l: Location) {
         processLocation(l)
@@ -265,7 +278,34 @@ class MainActivity : AppCompatActivity(), LocationListener {
         private const val INITIAL_ZOOM = 13.0
 
         // replace with proper style, if available
-        private const val TILE_SERVER = "https://demotiles.maplibre.org/style.json"
+        // CAUTION: DO NOT COMMIT THIS URL
+        private const val TILE_SERVER = "https://tiles.beemo.eu/styles/default/style.json" // "https://demotiles.maplibre.org/style.json"
     }
 
+    // LocationPrivacyToolkitListener
+
+    override fun onRemoveLocation(l: Location) {
+        if (this.lastLocations.remove(l)) {
+            val date = dateFormat.format(Date(l.time))
+            showMessage("Location at $date deleted")
+            updateMapLocations()
+        }
+    }
+
+    override fun onRemoveLocation(timestamp: Long) {
+        if (this.lastLocations.removeAll { it.time == timestamp }) {
+            val date = dateFormat.format(Date(timestamp))
+            showMessage("Location at $date deleted")
+            updateMapLocations()
+        }
+    }
+
+    override fun onRemoveLocationRange(fromTimestamp: Long, toTimestamp: Long) {
+        if (this.lastLocations.removeAll { it.time in fromTimestamp..toTimestamp }) {
+            val fromDate = dateFormat.format(Date(fromTimestamp))
+            val toDate = dateFormat.format(Date(toTimestamp))
+            showMessage("Locations from $fromDate-$toDate deleted")
+            updateMapLocations()
+        }
+    }
 }
