@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigInterface
 import de.fh.muenster.locationprivacytoolkit.databinding.ListItemLocationPrivacyConfigBinding
@@ -49,6 +50,8 @@ class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAd
                 LocationPrivacyConfigInterface.Switch -> initSwitch(config, hasLocationAccess)
                 LocationPrivacyConfigInterface.Slider -> initSlider(config, hasLocationAccess)
             }
+
+            dataBinding.locationConfigTitle.setOnClickListener { showConfigDetails(config) }
         }
 
         private fun initSwitch(config: LocationPrivacyConfig, hasLocationAccess: Boolean) {
@@ -105,6 +108,14 @@ class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAd
 
         private fun updateCurrentState(config: LocationPrivacyConfig, value: Int?) {
             dataBinding.locationConfigChip.text = config.formatLabel(value ?: config.defaultValue)
+        }
+
+        private fun showConfigDetails(config: LocationPrivacyConfig) {
+            MaterialAlertDialogBuilder(dataBinding.root.context).apply {
+                setTitle(config.titleId)
+                setMessage(config.descriptionId)
+                setPositiveButton("Close", null)
+            }.show()
         }
     }
 
