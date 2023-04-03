@@ -279,7 +279,7 @@ class MainActivity : AppCompatActivity(), LocationListener, LocationPrivacyToolk
 
         // replace with proper style, if available
         // CAUTION: DO NOT COMMIT THIS URL
-        private const val TILE_SERVER = "https://tiles.beemo.eu/styles/default/style.json" // "https://demotiles.maplibre.org/style.json"
+        private const val TILE_SERVER = "https://demotiles.maplibre.org/style.json"
     }
 
     // LocationPrivacyToolkitListener
