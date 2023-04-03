@@ -43,6 +43,8 @@ class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAd
         fun bindTo(config: LocationPrivacyConfig) {
             dataBinding.locationConfigTitle.text =
                 dataBinding.root.context.getString(config.titleId)
+            dataBinding.locationConfigSubtitle.text =
+                dataBinding.root.context.getString(config.subtitleId)
 
             val hasLocationAccess = listener.getPrivacyConfigValue(LocationPrivacyConfig.Access) > 0
 
@@ -51,7 +53,7 @@ class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAd
                 LocationPrivacyConfigInterface.Slider -> initSlider(config, hasLocationAccess)
             }
 
-            dataBinding.locationConfigTitle.setOnClickListener { showConfigDetails(config) }
+            dataBinding.locationConfigTitleView.setOnClickListener { showConfigDetails(config) }
         }
 
         private fun initSwitch(config: LocationPrivacyConfig, hasLocationAccess: Boolean) {

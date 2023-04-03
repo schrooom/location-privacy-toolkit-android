@@ -18,6 +18,15 @@ enum class LocationPrivacyConfig {
             AutoDeletion -> R.string.autoDeletionTitle
         }
 
+    val subtitleId: Int
+        get() = when(this) {
+            Access -> R.string.accessSubtitle
+            Accuracy -> R.string.accuracySubtitle
+            Interval -> R.string.intervalSubtitle
+            Visibility -> R.string.visibilitySubtitle
+            AutoDeletion -> R.string.autoDeletionSubtitle
+        }
+
     val descriptionId: Int
         get() = when(this) {
             Access -> R.string.accessDescription
