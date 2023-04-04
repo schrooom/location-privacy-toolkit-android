@@ -59,7 +59,11 @@ class LocationPrivacyToolkit(context: Context, private val listener: LocationPri
         executor: Executor,
         consumer: Consumer<Location?>
     ) {
-        // TODO: locationManager.getCurrentLocation(provider, cancellationSignal, executor, consumer)
+        val privacyConsumer = Consumer<Location> {
+            val processedLocation = processLocation(it)
+            consumer.accept(processedLocation)
+        }
+        locationManager.getCurrentLocation(provider, cancellationSignal, executor, privacyConsumer)
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
@@ -71,7 +75,11 @@ class LocationPrivacyToolkit(context: Context, private val listener: LocationPri
         executor: Executor,
         consumer: Consumer<Location?>
     ) {
-        // TODO: locationManager.getCurrentLocation(provider, locationRequest, cancellationSignal, executor, consumer)
+        val privacyConsumer = Consumer<Location> {
+            val processedLocation = processLocation(it)
+            consumer.accept(processedLocation)
+        }
+        locationManager.getCurrentLocation(provider, locationRequest, cancellationSignal, executor, privacyConsumer)
     }
 
     @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
