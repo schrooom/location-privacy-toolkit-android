@@ -18,7 +18,7 @@ import kotlinx.coroutines.*
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 
-class LocationPrivacyToolkit(context: Context, private val listener: LocationPrivacyToolkitListener): LocationListener {
+class LocationPrivacyToolkit(context: Context, private val listener: LocationPrivacyToolkitListener? = null): LocationListener {
 
     private val locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
     private var config = LocationPrivacyConfigManager(context)
@@ -176,7 +176,7 @@ class LocationPrivacyToolkit(context: Context, private val listener: LocationPri
         val autoDeletionTime = autoDeletionTimeSeconds ?: return
         MainScope().launch {
             delay(autoDeletionTime * 1000L)
-            listener.onRemoveLocation(processedLocation)
+            listener?.onRemoveLocation(processedLocation)
         }
     }
 }
