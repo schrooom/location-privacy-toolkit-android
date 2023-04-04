@@ -125,8 +125,11 @@ class LocationPrivacyToolkit(context: Context, private val listener: LocationPri
         minDistanceM: Float,
         pendingIntent: PendingIntent
     ) {
+        throw NotImplementedError("PendingIntents are not implemented yet")
+        /*
         this.internalPendingIntents.add(pendingIntent)
-        // TODO: locationManager.requestLocationUpdates(provider, minTimeMs, minDistanceM, pendingIntent)
+        locationManager.requestLocationUpdates(provider, minTimeMs, minDistanceM, pendingIntent)
+        */
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
@@ -148,8 +151,11 @@ class LocationPrivacyToolkit(context: Context, private val listener: LocationPri
         locationRequest: LocationRequest,
         pendingIntent: PendingIntent
     ) {
+        throw NotImplementedError("PendingIntents are not implemented yet")
+        /*
         this.internalPendingIntents.add(pendingIntent)
-        // TODO: locationManager.requestLocationUpdates(provider, locationRequest, pendingIntent)
+        locationManager.requestLocationUpdates(provider, locationRequest, pendingIntent)
+        */
     }
 
     fun removeUpdates(listener: LocationListener) {
@@ -160,10 +166,13 @@ class LocationPrivacyToolkit(context: Context, private val listener: LocationPri
     }
 
     fun removeUpdates(pendingIntent: PendingIntent) {
+        throw NotImplementedError("PendingIntents are not implemented yet")
+        /*
         internalPendingIntents.remove(pendingIntent)
         if (internalPendingIntents.isEmpty()) {
-            // TODO: locationManager.removeUpdates(pendingIntent)
+            locationManager.removeUpdates(pendingIntent)
         }
+        */
     }
 
     fun processLocation(location: Location?): Location? {
