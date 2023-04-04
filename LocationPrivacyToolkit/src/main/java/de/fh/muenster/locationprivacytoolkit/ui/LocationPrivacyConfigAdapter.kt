@@ -105,6 +105,7 @@ class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAd
             // enable, if location-access is enabled
             dataBinding.locationConfigSlider.isEnabled = hasLocationAccess
             dataBinding.locationConfigSlider.visibility = View.VISIBLE
+            dataBinding.locationConfigChip.isEnabled = hasLocationAccess
             dataBinding.locationConfigChip.visibility = View.VISIBLE
         }
 

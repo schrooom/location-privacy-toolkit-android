@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ navikiLib
+  ~
+  ~ Copyright 2016
+  ~ beemo GmbH, Muenster,
+  ~ and individual contributors as indicated
+  ~ by the @authors tag.
+  ~
+  -->
+
+<resources>
+    <style name="Theme.LocationPrivacyToolkit" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
+        <!-- empty theme, override in app -->
+    </style>
+</resources>
