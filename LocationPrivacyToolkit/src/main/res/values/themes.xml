@@ -22,7 +22,7 @@
         <!-- empty theme, override in app -->
     </style>
 
-    <style name="Theme.LocationPrivacyToolkit.Chip" parent="Widget.MaterialComponents.Chip.Entry">
+    <style name="Theme.LocationPrivacyToolkit.Chip" parent="Widget.MaterialComponents.Chip.Action">
         <!-- empty theme, override in app -->
     </style>
 
