@@ -12,4 +12,21 @@
     <style name="Theme.LocationPrivacyToolkit" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
         <!-- empty theme, override in app -->
     </style>
+
+    <style name="Theme.LocationPrivacyToolkit.Slider" parent="Widget.MaterialComponents.Slider">
+        <item name="labelStyle">@style/Theme.LocationPrivacyToolkit.SliderTooltip</item>
+        <!-- empty theme, override in app -->
+    </style>
+
+    <style name="Theme.LocationPrivacyToolkit.SliderTooltip" parent="Widget.MaterialComponents.Tooltip">
+        <!-- empty theme, override in app -->
+    </style>
+
+    <style name="Theme.LocationPrivacyToolkit.Chip" parent="Widget.MaterialComponents.Chip.Entry">
+        <!-- empty theme, override in app -->
+    </style>
+
+    <style name="Theme.LocationPrivacyToolkit.Switch" parent="Widget.MaterialComponents.CompoundButton.Switch">
+        <!-- empty theme, override in app -->
+    </style>
 </resources>
