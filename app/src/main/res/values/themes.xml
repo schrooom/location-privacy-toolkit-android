@@ -11,6 +11,12 @@
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
-        <!-- Customize your theme here. -->
+    </style>
+
+    <style name="Theme.LocationPrivacyToolkit" parent="Theme.LocationPrivacyToolkitApp">
+    </style>
+
+    <style name="Theme.LocationPrivacyToolkit.SliderTooltip" parent="Widget.MaterialComponents.Tooltip">
+        <item name="backgroundTint">?colorPrimary</item>
     </style>
 </resources>

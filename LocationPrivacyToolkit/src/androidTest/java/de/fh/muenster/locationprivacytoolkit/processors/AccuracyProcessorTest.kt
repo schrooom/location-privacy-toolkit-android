@@ -1,13 +1,11 @@
 package de.fh.muenster.locationprivacytoolkit.processors
 
 import android.location.Location
-import android.location.LocationManager
-import android.location.LocationProvider
 import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import de.fh.muenster.locationprivacytoolkit.LocationPrivacyConfig
-import de.fh.muenster.locationprivacytoolkit.LocationPrivacyConfigKey
+import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
+import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkit
 import org.junit.Assert.*
 import org.junit.Test
@@ -22,27 +20,29 @@ import org.junit.runner.RunWith
 class AccuracyProcessorTest {
     @Test
     fun manipulateAccuracy() {
-        var appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        var config = LocationPrivacyConfig(appContext)
-        config.setPrivacyConfig(LocationPrivacyConfigKey.accuracy, 50)
+        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
+        val config = LocationPrivacyConfigManager(appContext)
+        config.setPrivacyConfig(LocationPrivacyConfig.Accuracy, 50)
 
         val lpt = LocationPrivacyToolkit(appContext)
 
 
         // TODO: use a proper mock location
-        var location = Location("")
-        location.setLatitude(52.0)
-        location.setLongitude(7.0)
+        val location = Location("")
+        location.latitude = 52.0
+        location.longitude = 7.0
         location.accuracy = 2f
 
-        var accuracyLocation = lpt.processLocation(location)
+        val accuracyLocation = lpt.processLocation(location)
+            ?: return fail("processed location was null")
 
 
         Log.d("Origin location\t", location.toString())
         Log.d("New location\t\t", accuracyLocation.toString())
 
-        val distance = accuracyLocation?.distanceTo(location)!!
-        val maxDist = config.getPrivacyConfig(LocationPrivacyConfigKey.accuracy)!!
+        val distance = accuracyLocation.distanceTo(location)
+        val maxDist = config.getPrivacyConfig(LocationPrivacyConfig.Accuracy)
+            ?: return fail("distance in LocationPrivacyConfig was null")
 
         Log.d("Distance\t\t", distance.toString())
 
