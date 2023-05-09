@@ -2,6 +2,7 @@ package de.fh.muenster.locationprivacytoolkit.processors
 
 import android.content.Context
 import android.location.*
+import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkitListener
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
 
@@ -12,7 +13,10 @@ import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
  *
  * @param context The application context
  */
-abstract class AbstractLocationProcessor(context: Context) {
+abstract class AbstractLocationProcessor(
+    context: Context,
+    var listener: LocationPrivacyToolkitListener? = null
+) {
 
     abstract val sort: LocationProcessorSort
 

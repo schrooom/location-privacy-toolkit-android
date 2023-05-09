@@ -1,10 +1,12 @@
 package de.fh.muenster.locationprivacytoolkit.config
 
 import android.content.Context
+import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkitListener
 import de.fh.muenster.locationprivacytoolkit.R
 import de.fh.muenster.locationprivacytoolkit.processors.AbstractLocationProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.AccessProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.AccuracyProcessor
+import de.fh.muenster.locationprivacytoolkit.processors.AutoDeletionProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.IntervalProcessor
 
 enum class LocationPrivacyConfig {
@@ -71,13 +73,13 @@ enum class LocationPrivacyConfig {
     val range: IntRange
         get() = IntRange(0, values.size - 1)
 
-    fun getLocationProcessor(context: Context): AbstractLocationProcessor? {
+    fun getLocationProcessor(context: Context, listener: LocationPrivacyToolkitListener?): AbstractLocationProcessor? {
         return when(this) {
             Access -> AccessProcessor(context)
             Accuracy -> AccuracyProcessor(context)
             Interval -> IntervalProcessor(context)
             Visibility -> null
-            AutoDeletion -> null
+            AutoDeletion -> AutoDeletionProcessor(context, listener)
         }
     }
 

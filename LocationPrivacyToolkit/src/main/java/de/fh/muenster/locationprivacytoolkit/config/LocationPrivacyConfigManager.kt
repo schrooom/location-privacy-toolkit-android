@@ -6,6 +6,7 @@ import android.location.Location
 import androidx.core.content.edit
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
+import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkitListener
 import de.fh.muenster.locationprivacytoolkit.processors.AbstractLocationProcessor
 import java.lang.ref.WeakReference
 
@@ -58,9 +59,13 @@ internal class LocationPrivacyConfigManager(context: Context) {
         const val LOCATION_PRIVACY_PREFERENCES = "location-privacy-preferences"
         const val LAST_LOCATION_KEY = "last-location"
 
-        fun getLocationProcessors(context: Context): List<AbstractLocationProcessor> {
+        fun getLocationProcessors(
+            context: Context,
+            listener: LocationPrivacyToolkitListener?
+        ): List<AbstractLocationProcessor> {
             val processors =
-                LocationPrivacyConfig.values().mapNotNull { c -> c.getLocationProcessor(context) }
+                LocationPrivacyConfig.values()
+                    .mapNotNull { c -> c.getLocationProcessor(context, listener) }
             return processors.sortedBy { p -> p.sort }
         }
     }
