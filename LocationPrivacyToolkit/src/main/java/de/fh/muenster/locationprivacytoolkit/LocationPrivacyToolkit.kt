@@ -9,32 +9,22 @@ import android.location.*
 import android.os.*
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
-import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
-import de.fh.muenster.locationprivacytoolkit.processors.AccessProcessor
-import de.fh.muenster.locationprivacytoolkit.processors.AccuracyProcessor
-import de.fh.muenster.locationprivacytoolkit.processors.IntervalProcessor
 import kotlinx.coroutines.*
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 
-class LocationPrivacyToolkit(context: Context, private val listener: LocationPrivacyToolkitListener? = null): LocationListener {
+class LocationPrivacyToolkit(
+    context: Context, private val listener: LocationPrivacyToolkitListener? = null
+) : LocationListener {
 
     private val locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
-    private var config = LocationPrivacyConfigManager(context)
-
-    private val accessProcessor = AccessProcessor(context)
-    private val accuracyProcessor = AccuracyProcessor(context)
-    private val intervalProcessor = IntervalProcessor(context)
+    private val locationProcessors =
+        LocationPrivacyConfigManager.getLocationProcessors(context, listener)
 
     private val internalListeners: MutableList<LocationListener> = mutableListOf()
     private val internalPendingIntents: MutableList<PendingIntent> = mutableListOf()
 
-    private val autoDeletionTimeSeconds: Int?
-        get() {
-            val time = config.getPrivacyConfig(LocationPrivacyConfig.AutoDeletion) ?: return null
-            return if (time <= 0) null else time
-        }
 
     @RequiresApi(Build.VERSION_CODES.P)
     fun isLocationEnabled(): Boolean {
@@ -79,15 +69,14 @@ class LocationPrivacyToolkit(context: Context, private val listener: LocationPri
             val processedLocation = processLocation(it)
             consumer.accept(processedLocation)
         }
-        locationManager.getCurrentLocation(provider, locationRequest, cancellationSignal, executor, privacyConsumer)
+        locationManager.getCurrentLocation(
+            provider, locationRequest, cancellationSignal, executor, privacyConsumer
+        )
     }
 
     @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
     fun requestLocationUpdates(
-        provider: String,
-        minTimeMs: Long,
-        minDistanceM: Float,
-        listener: LocationListener
+        provider: String, minTimeMs: Long, minDistanceM: Float, listener: LocationListener
     ) {
         internalListeners.add(listener)
         locationManager.requestLocationUpdates(provider, minTimeMs, minDistanceM, this)
@@ -120,13 +109,9 @@ class LocationPrivacyToolkit(context: Context, private val listener: LocationPri
 
     @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
     fun requestLocationUpdates(
-        provider: String,
-        minTimeMs: Long,
-        minDistanceM: Float,
-        pendingIntent: PendingIntent
+        provider: String, minTimeMs: Long, minDistanceM: Float, pendingIntent: PendingIntent
     ) {
-        throw NotImplementedError("PendingIntents are not implemented yet")
-        /*
+        throw NotImplementedError("PendingIntents are not implemented yet")/*
         this.internalPendingIntents.add(pendingIntent)
         locationManager.requestLocationUpdates(provider, minTimeMs, minDistanceM, pendingIntent)
         */
@@ -147,12 +132,9 @@ class LocationPrivacyToolkit(context: Context, private val listener: LocationPri
     @RequiresApi(Build.VERSION_CODES.S)
     @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
     fun requestLocationUpdates(
-        provider: String,
-        locationRequest: LocationRequest,
-        pendingIntent: PendingIntent
+        provider: String, locationRequest: LocationRequest, pendingIntent: PendingIntent
     ) {
-        throw NotImplementedError("PendingIntents are not implemented yet")
-        /*
+        throw NotImplementedError("PendingIntents are not implemented yet")/*
         this.internalPendingIntents.add(pendingIntent)
         locationManager.requestLocationUpdates(provider, locationRequest, pendingIntent)
         */
@@ -166,8 +148,7 @@ class LocationPrivacyToolkit(context: Context, private val listener: LocationPri
     }
 
     fun removeUpdates(pendingIntent: PendingIntent) {
-        throw NotImplementedError("PendingIntents are not implemented yet")
-        /*
+        throw NotImplementedError("PendingIntents are not implemented yet")/*
         internalPendingIntents.remove(pendingIntent)
         if (internalPendingIntents.isEmpty()) {
             locationManager.removeUpdates(pendingIntent)
@@ -177,10 +158,9 @@ class LocationPrivacyToolkit(context: Context, private val listener: LocationPri
 
     fun processLocation(location: Location?): Location? {
         // pipe location through all processors
-        return location
-                .let { accessProcessor.process(it) }
-                .let { accuracyProcessor.process(it) }
-                .let { intervalProcessor.process(it) }
+        var l = location
+        locationProcessors.forEach { p -> l = p.process(l) }
+        return l
     }
 
     // LocationListener
@@ -189,12 +169,6 @@ class LocationPrivacyToolkit(context: Context, private val listener: LocationPri
         val processedLocation = processLocation(l) ?: return
         internalListeners.forEach { it.onLocationChanged(processedLocation) }
         internalPendingIntents.forEach { /* TODO */ }
-
-        val autoDeletionTime = autoDeletionTimeSeconds ?: return
-        MainScope().launch {
-            delay(autoDeletionTime * 1000L)
-            listener?.onRemoveLocation(processedLocation)
-        }
     }
 }
 

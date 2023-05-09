@@ -24,7 +24,8 @@ abstract class AbstractLocationProcessor(
     abstract val configKey: LocationPrivacyConfig
 
     // The actual config from the LocationPrivacyConfig
-    internal val locationPrivacyConfig: LocationPrivacyConfigManager = LocationPrivacyConfigManager(context)
+    internal val locationPrivacyConfig: LocationPrivacyConfigManager =
+        LocationPrivacyConfigManager(context)
 
     /**
      * Function to get the corresponding config value
@@ -47,7 +48,7 @@ abstract class AbstractLocationProcessor(
         if (location == null) {
             return null
         }
-         // get config or return location if config is null
+        // get config or return location if config is null
         val config = configValue ?: return location
 
         return this.manipulateLocation(location, config)

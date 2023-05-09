@@ -15,13 +15,13 @@ import gov.nasa.worldwind.globes.Earth
  */
 class AccuracyProcessor(context: Context): AbstractLocationProcessor(context) {
     override val configKey = LocationPrivacyConfig.Accuracy
-    override val sort = LocationProcessorSort.High
+    override val sort = LocationProcessorSort.Medium
 
     /**
      * The location will be moved to a random point around the actual
      * point and the `accuracy` metadata will be changed as well
      */
-    override fun manipulateLocation(location: Location, config: Int): Location? {
+    override fun manipulateLocation(location: Location, config: Int): Location {
         if (location.accuracy >= config) {
             return location
         }
