@@ -111,7 +111,8 @@ class LocationPrivacyToolkit(
     fun requestLocationUpdates(
         provider: String, minTimeMs: Long, minDistanceM: Float, pendingIntent: PendingIntent
     ) {
-        throw NotImplementedError("PendingIntents are not implemented yet")/*
+        throw NotImplementedError("PendingIntents are not implemented yet")
+        /*
         this.internalPendingIntents.add(pendingIntent)
         locationManager.requestLocationUpdates(provider, minTimeMs, minDistanceM, pendingIntent)
         */
@@ -134,7 +135,8 @@ class LocationPrivacyToolkit(
     fun requestLocationUpdates(
         provider: String, locationRequest: LocationRequest, pendingIntent: PendingIntent
     ) {
-        throw NotImplementedError("PendingIntents are not implemented yet")/*
+        throw NotImplementedError("PendingIntents are not implemented yet")
+        /*
         this.internalPendingIntents.add(pendingIntent)
         locationManager.requestLocationUpdates(provider, locationRequest, pendingIntent)
         */
@@ -148,7 +150,8 @@ class LocationPrivacyToolkit(
     }
 
     fun removeUpdates(pendingIntent: PendingIntent) {
-        throw NotImplementedError("PendingIntents are not implemented yet")/*
+        throw NotImplementedError("PendingIntents are not implemented yet")
+        /*
         internalPendingIntents.remove(pendingIntent)
         if (internalPendingIntents.isEmpty()) {
             locationManager.removeUpdates(pendingIntent)
