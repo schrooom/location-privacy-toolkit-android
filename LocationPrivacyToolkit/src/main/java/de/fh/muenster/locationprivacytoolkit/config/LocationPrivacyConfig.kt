@@ -1,6 +1,11 @@
 package de.fh.muenster.locationprivacytoolkit.config
 
+import android.content.Context
 import de.fh.muenster.locationprivacytoolkit.R
+import de.fh.muenster.locationprivacytoolkit.processors.AbstractLocationProcessor
+import de.fh.muenster.locationprivacytoolkit.processors.AccessProcessor
+import de.fh.muenster.locationprivacytoolkit.processors.AccuracyProcessor
+import de.fh.muenster.locationprivacytoolkit.processors.IntervalProcessor
 
 enum class LocationPrivacyConfig {
     Access,
@@ -66,6 +71,16 @@ enum class LocationPrivacyConfig {
     val range: IntRange
         get() = IntRange(0, values.size - 1)
 
+    fun getLocationProcessor(context: Context): AbstractLocationProcessor? {
+        return when(this) {
+            Access -> AccessProcessor(context)
+            Accuracy -> AccuracyProcessor(context)
+            Interval -> IntervalProcessor(context)
+            Visibility -> null
+            AutoDeletion -> null
+        }
+    }
+
     fun formatLabel(value: Int): String {
         return when(this) {
             Access -> ""
@@ -98,7 +113,6 @@ enum class LocationPrivacyConfig {
         }
         return null
     }
-
 }
 
 enum class LocationPrivacyConfigInterface {

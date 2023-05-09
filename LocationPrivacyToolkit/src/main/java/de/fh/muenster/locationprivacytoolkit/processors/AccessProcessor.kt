@@ -6,6 +6,7 @@ import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 
 class AccessProcessor(context: Context): AbstractLocationProcessor(context) {
     override val configKey = LocationPrivacyConfig.Access
+    override val sort = LocationProcessorSort.High
 
     override fun manipulateLocation(location: Location, config: Int): Location? {
         if (config == 1) {

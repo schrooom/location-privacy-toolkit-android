@@ -15,6 +15,7 @@ import gov.nasa.worldwind.globes.Earth
  */
 class AccuracyProcessor(context: Context): AbstractLocationProcessor(context) {
     override val configKey = LocationPrivacyConfig.Accuracy
+    override val sort = LocationProcessorSort.High
 
     /**
      * The location will be moved to a random point around the actual

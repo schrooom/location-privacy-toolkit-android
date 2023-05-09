@@ -13,6 +13,9 @@ import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
  * @param context The application context
  */
 abstract class AbstractLocationProcessor(context: Context) {
+
+    abstract val sort: LocationProcessorSort
+
     // The configuration the subclass is processing. Must be implemented by subclass
     abstract val configKey: LocationPrivacyConfig
 
