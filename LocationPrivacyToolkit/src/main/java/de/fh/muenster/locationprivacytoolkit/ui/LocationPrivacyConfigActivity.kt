@@ -14,7 +14,8 @@ import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
 import de.fh.muenster.locationprivacytoolkit.databinding.ActivityLocationPrivacyConfigBinding
 
-class LocationPrivacyConfigActivity : AppCompatActivity(), LocationPrivacyConfigAdapter.LocationPrivacyConfigAdapterListener {
+class LocationPrivacyConfigActivity : AppCompatActivity(),
+    LocationPrivacyConfigAdapter.LocationPrivacyConfigAdapterListener {
 
     private lateinit var binding: ActivityLocationPrivacyConfigBinding
     private lateinit var configAdapter: LocationPrivacyConfigAdapter
@@ -55,11 +56,12 @@ class LocationPrivacyConfigActivity : AppCompatActivity(), LocationPrivacyConfig
         }
 
         val hasBackgroundPermission = checkSelfPermission(ACCESS_BACKGROUND_LOCATION)
-        binding.locationConfigSystemBackgroundValue.text = if (hasBackgroundPermission == PackageManager.PERMISSION_GRANTED) {
-            "yes"
-        } else {
-            "no"
-        }
+        binding.locationConfigSystemBackgroundValue.text =
+            if (hasBackgroundPermission == PackageManager.PERMISSION_GRANTED) {
+                "yes"
+            } else {
+                "no"
+            }
     }
 
     // LocationPrivacyConfigAdapterListener

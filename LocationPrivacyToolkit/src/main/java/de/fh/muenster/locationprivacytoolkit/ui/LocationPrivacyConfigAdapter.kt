@@ -12,9 +12,10 @@ import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigInterfa
 import de.fh.muenster.locationprivacytoolkit.databinding.ListItemLocationPrivacyConfigBinding
 
 
-class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAdapterListener): ListAdapter<LocationPrivacyConfig, LocationPrivacyConfigAdapter.LocationPrivacyConfigViewHolder>(
-    diffCallback
-) {
+class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAdapterListener) :
+    ListAdapter<LocationPrivacyConfig, LocationPrivacyConfigAdapter.LocationPrivacyConfigViewHolder>(
+        diffCallback
+    ) {
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -129,12 +130,19 @@ class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAd
     }
 
     companion object {
-        val diffCallback: DiffUtil.ItemCallback<LocationPrivacyConfig> = object : DiffUtil.ItemCallback<LocationPrivacyConfig>() {
-            override fun areItemsTheSame(oldItem: LocationPrivacyConfig, newItem: LocationPrivacyConfig): Boolean =
-                oldItem == newItem
+        val diffCallback: DiffUtil.ItemCallback<LocationPrivacyConfig> =
+            object : DiffUtil.ItemCallback<LocationPrivacyConfig>() {
+                override fun areItemsTheSame(
+                    oldItem: LocationPrivacyConfig,
+                    newItem: LocationPrivacyConfig
+                ): Boolean =
+                    oldItem == newItem
 
-            override fun areContentsTheSame(oldItem: LocationPrivacyConfig, newItem: LocationPrivacyConfig): Boolean =
-                oldItem == newItem
-        }
+                override fun areContentsTheSame(
+                    oldItem: LocationPrivacyConfig,
+                    newItem: LocationPrivacyConfig
+                ): Boolean =
+                    oldItem == newItem
+            }
     }
 }

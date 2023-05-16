@@ -17,7 +17,7 @@ enum class LocationPrivacyConfig {
     AutoDeletion;
 
     val titleId: Int
-        get() = when(this) {
+        get() = when (this) {
             Access -> R.string.accessTitle
             Accuracy -> R.string.accuracyTitle
             Interval -> R.string.intervalTitle
@@ -26,7 +26,7 @@ enum class LocationPrivacyConfig {
         }
 
     val subtitleId: Int
-        get() = when(this) {
+        get() = when (this) {
             Access -> R.string.accessSubtitle
             Accuracy -> R.string.accuracySubtitle
             Interval -> R.string.intervalSubtitle
@@ -35,7 +35,7 @@ enum class LocationPrivacyConfig {
         }
 
     val descriptionId: Int
-        get() = when(this) {
+        get() = when (this) {
             Access -> R.string.accessDescription
             Accuracy -> R.string.accuracyDescription
             Interval -> R.string.intervalDescription
@@ -44,7 +44,7 @@ enum class LocationPrivacyConfig {
         }
 
     val defaultValue: Int
-        get() = when(this) {
+        get() = when (this) {
             Access -> 0
             Accuracy -> 0
             Interval -> 0
@@ -53,7 +53,7 @@ enum class LocationPrivacyConfig {
         }
 
     val values: Array<Int>
-        get() = when(this) {
+        get() = when (this) {
             Access -> arrayOf(0, 1)
             Accuracy -> arrayOf(1000, 500, 100, 0)
             Interval -> arrayOf(1000, 600, 60, 0)
@@ -62,7 +62,7 @@ enum class LocationPrivacyConfig {
         }
 
     val userInterface: LocationPrivacyConfigInterface
-        get() = when(this) {
+        get() = when (this) {
             Access -> LocationPrivacyConfigInterface.Switch
             Accuracy -> LocationPrivacyConfigInterface.Slider
             Interval -> LocationPrivacyConfigInterface.Slider
@@ -73,8 +73,11 @@ enum class LocationPrivacyConfig {
     val range: IntRange
         get() = IntRange(0, values.size - 1)
 
-    fun getLocationProcessor(context: Context, listener: LocationPrivacyToolkitListener?): AbstractLocationProcessor? {
-        return when(this) {
+    fun getLocationProcessor(
+        context: Context,
+        listener: LocationPrivacyToolkitListener?
+    ): AbstractLocationProcessor? {
+        return when (this) {
             Access -> AccessProcessor(context)
             Accuracy -> AccuracyProcessor(context)
             Interval -> IntervalProcessor(context)
@@ -84,21 +87,23 @@ enum class LocationPrivacyConfig {
     }
 
     fun formatLabel(value: Int): String {
-        return when(this) {
+        return when (this) {
             Access -> ""
             Accuracy -> "${value}m"
             Interval -> "${value}s"
             Visibility -> {
-                when(value) {
+                when (value) {
                     1 -> "Friends"
                     2 -> "Contacts"
                     3 -> "Everyone"
                     else -> "None"
                 }
             }
+
             AutoDeletion -> "${value}s"
         }
     }
+
     fun indexToValue(indexValue: Float): Int? {
         val configValues = this.values
         if (configValues.isNotEmpty()) {
