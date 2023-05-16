@@ -66,7 +66,7 @@ class LocationHistoryActivity : AppCompatActivity() {
         // roughly Münster Westf.
         private const val INITIAL_LATITUDE = 51.961563
         private const val INITIAL_LONGITUDE = 7.628202
-        private const val INITIAL_ZOOM = 13.0
+        private const val INITIAL_ZOOM = 3.0
 
         // replace with proper style, if available
         private const val TILE_SERVER = "https://demotiles.maplibre.org/style.json"

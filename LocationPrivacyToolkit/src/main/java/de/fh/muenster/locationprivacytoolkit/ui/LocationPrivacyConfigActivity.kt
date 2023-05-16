@@ -5,8 +5,10 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
@@ -21,6 +23,7 @@ class LocationPrivacyConfigActivity : AppCompatActivity(),
     private lateinit var configAdapter: LocationPrivacyConfigAdapter
     private lateinit var configManager: LocationPrivacyConfigManager
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -55,13 +58,22 @@ class LocationPrivacyConfigActivity : AppCompatActivity(),
             else -> "unset"
         }
 
-        val hasBackgroundPermission = checkSelfPermission(ACCESS_BACKGROUND_LOCATION)
+        val hasBackgroundPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            checkSelfPermission(ACCESS_BACKGROUND_LOCATION)
+        } else {
+            TODO("VERSION.SDK_INT < Q")
+        }
         binding.locationConfigSystemBackgroundValue.text =
             if (hasBackgroundPermission == PackageManager.PERMISSION_GRANTED) {
                 "yes"
             } else {
                 "no"
             }
+
+        binding.locationHistoryCard.setOnClickListener {
+            val intent = Intent(this, LocationHistoryActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     // LocationPrivacyConfigAdapterListener
