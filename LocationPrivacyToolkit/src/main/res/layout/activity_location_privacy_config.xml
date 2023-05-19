@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
-
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -32,7 +30,7 @@
                         android:id="@+id/locationConfigSystemCardTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="System Permissions"
+                        android:text="@string/systemPermissionTitle"
                         android:textAlignment="textStart"
                         android:textSize="18sp"
                         app:layout_constraintStart_toStartOf="parent"
@@ -58,7 +56,7 @@
                         android:paddingTop="8dp"
                         android:paddingEnd="0dp"
                         android:paddingBottom="4dp"
-                        android:text="Location Access"
+                        android:text="@string/systemPermissionLocationAccessTitle"
                         android:textAlignment="textStart"
                         android:textSize="12sp"
                         app:layout_constraintStart_toStartOf="parent"
@@ -84,7 +82,7 @@
                         android:paddingStart="8dp"
                         android:paddingTop="4dp"
                         android:paddingEnd="0dp"
-                        android:text="Background Access"
+                        android:text="@string/systemPermissionBackgroundAccessTitle"
                         android:textAlignment="textStart"
                         android:textSize="12sp"
                         app:layout_constraintStart_toStartOf="parent"
@@ -125,7 +123,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingBottom="16dp"
-                        android:text="Privacy Configuration"
+                        android:text="@string/privacyConfigTitle"
                         android:textAlignment="textStart"
                         android:textSize="18sp"
                         app:layout_constraintStart_toStartOf="parent"

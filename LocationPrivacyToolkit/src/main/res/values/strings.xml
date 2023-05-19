@@ -1,4 +1,8 @@
 <resources>
+    <string name="systemPermissionTitle">System Permissions</string>
+    <string name="systemPermissionLocationAccessTitle">Location Access</string>
+    <string name="systemPermissionBackgroundAccessTitle">Background Access</string>
+    <string name="privacyConfigTitle">Privacy Configuration</string>
     <string name="accessTitle">Access</string>
     <string name="accessSubtitle">Share your location info?</string>
     <string name="accessDescription">The access-option is the tool to choose, whether your location data is passed to the app or not. With this option you can allow or disallow an app to use your location information altogether.</string>
