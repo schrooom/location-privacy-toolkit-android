@@ -15,7 +15,7 @@ import java.util.concurrent.Executor
 import java.util.function.Consumer
 
 class LocationPrivacyToolkit(
-    context: Context, private val listener: LocationPrivacyToolkitListener? = null
+    context: Context, listener: LocationPrivacyToolkitListener? = null
 ) : LocationListener {
 
     private val locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
@@ -178,5 +178,6 @@ class LocationPrivacyToolkit(
 interface LocationPrivacyToolkitListener {
     fun onRemoveLocation(l: Location)
     fun onRemoveLocation(timestamp: Long)
+    fun onRemoveLocations(locations: List<Location>)
     fun onRemoveLocationRange(fromTimestamp: Long, toTimestamp: Long)
 }

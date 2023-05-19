@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
@@ -69,14 +70,12 @@ class LocationPrivacyConfigActivity : AppCompatActivity(),
             } else {
                 "no"
             }
-
-        binding.locationHistoryCard.setOnClickListener {
-            val intent = Intent(this, LocationHistoryActivity::class.java)
-            startActivity(intent)
-        }
     }
 
     // LocationPrivacyConfigAdapterListener
+
+    override val fragmentManager: FragmentManager
+        get() = supportFragmentManager
 
     override fun onPrivacyConfigChanged(config: LocationPrivacyConfig, value: Int) {
         configManager.setPrivacyConfig(config, value)

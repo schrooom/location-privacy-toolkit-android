@@ -1,30 +1,48 @@
-package de.fh.muenster.locationprivacytoolkit.ui
+package de.fh.muenster.locationprivacytoolkit.config.ui
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
-import de.fh.muenster.locationprivacytoolkit.databinding.ActivityLocationHistoryBinding
+import de.fh.muenster.locationprivacytoolkit.databinding.FragmentLocationHistoryBinding
 
-class LocationHistoryActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityLocationHistoryBinding
+class LocationHistoryFragment : Fragment() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    private lateinit var binding: FragmentLocationHistoryBinding
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         super.onCreate(savedInstanceState)
-        Mapbox.getInstance(this)
+        context?.let {
+            Mapbox.getInstance(it)
+        }
 
-        binding = ActivityLocationHistoryBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        binding = FragmentLocationHistoryBinding.inflate(inflater, container, false)
 
         binding.mapView.getMapAsync { map ->
             map.setStyle(TILE_SERVER)
-            val initialLatLng = LatLng(INITIAL_LATITUDE, INITIAL_LONGITUDE)
-            val camera = CameraUpdateFactory.newLatLngZoom(initialLatLng, INITIAL_ZOOM)
+            val initialLatLng = LatLng(
+                INITIAL_LATITUDE,
+                INITIAL_LONGITUDE
+            )
+            val camera = CameraUpdateFactory.newLatLngZoom(
+                initialLatLng,
+                INITIAL_ZOOM
+            )
             map.easeCamera(camera)
         }
+
+        return binding.root
     }
+
 
     override fun onStart() {
         super.onStart()

@@ -9,6 +9,7 @@
         android:layout_height="match_parent">
 
         <LinearLayout
+            android:id="@+id/fragmentContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:keepScreenOn="true"
@@ -141,28 +142,6 @@
                         app:layout_constraintTop_toBottomOf="@id/locationConfigToolkitCardTitle" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
-            </androidx.cardview.widget.CardView>
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/locationHistoryCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="8dp">
-
-                <TextView
-                    android:id="@+id/locationHistory"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:text="Location History"
-                    android:textAlignment="textStart"
-                    android:textSize="18sp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
             </androidx.cardview.widget.CardView>
 
 

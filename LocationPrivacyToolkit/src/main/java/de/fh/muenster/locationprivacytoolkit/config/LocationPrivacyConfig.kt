@@ -1,8 +1,10 @@
 package de.fh.muenster.locationprivacytoolkit.config
 
 import android.content.Context
+import androidx.fragment.app.Fragment
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkitListener
 import de.fh.muenster.locationprivacytoolkit.R
+import de.fh.muenster.locationprivacytoolkit.config.ui.LocationHistoryFragment
 import de.fh.muenster.locationprivacytoolkit.processors.AbstractLocationProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.AccessProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.AccuracyProcessor
@@ -14,7 +16,8 @@ enum class LocationPrivacyConfig {
     Accuracy,
     Interval,
     Visibility,
-    AutoDeletion;
+    AutoDeletion,
+    History;
 
     val titleId: Int
         get() = when (this) {
@@ -23,6 +26,7 @@ enum class LocationPrivacyConfig {
             Interval -> R.string.intervalTitle
             Visibility -> R.string.visibilityTitle
             AutoDeletion -> R.string.autoDeletionTitle
+            History -> R.string.historyTitle
         }
 
     val subtitleId: Int
@@ -32,6 +36,7 @@ enum class LocationPrivacyConfig {
             Interval -> R.string.intervalSubtitle
             Visibility -> R.string.visibilitySubtitle
             AutoDeletion -> R.string.autoDeletionSubtitle
+            History -> R.string.historySubtitle
         }
 
     val descriptionId: Int
@@ -41,6 +46,7 @@ enum class LocationPrivacyConfig {
             Interval -> R.string.intervalDescription
             Visibility -> R.string.visibilityDescription
             AutoDeletion -> R.string.autoDeletionDescription
+            History -> R.string.historyDescription
         }
 
     val defaultValue: Int
@@ -50,6 +56,7 @@ enum class LocationPrivacyConfig {
             Interval -> 0
             Visibility -> 0
             AutoDeletion -> 0
+            History -> 0
         }
 
     val values: Array<Int>
@@ -59,6 +66,7 @@ enum class LocationPrivacyConfig {
             Interval -> arrayOf(1000, 600, 60, 0)
             Visibility -> arrayOf(0, 1, 2, 3)
             AutoDeletion -> arrayOf(1000, 600, 60, 0)
+            History -> emptyArray()
         }
 
     val userInterface: LocationPrivacyConfigInterface
@@ -68,10 +76,17 @@ enum class LocationPrivacyConfig {
             Interval -> LocationPrivacyConfigInterface.Slider
             Visibility -> LocationPrivacyConfigInterface.Slider
             AutoDeletion -> LocationPrivacyConfigInterface.Slider
+            History -> LocationPrivacyConfigInterface.Fragment
         }
 
     val range: IntRange
         get() = IntRange(0, values.size - 1)
+
+    val fragment: Fragment?
+        get() = when (this) {
+            History -> LocationHistoryFragment()
+            else -> null
+        }
 
     fun getLocationProcessor(
         context: Context,
@@ -83,6 +98,7 @@ enum class LocationPrivacyConfig {
             Interval -> IntervalProcessor(context)
             Visibility -> null
             AutoDeletion -> AutoDeletionProcessor(context, listener)
+            History -> null
         }
     }
 
@@ -101,6 +117,7 @@ enum class LocationPrivacyConfig {
             }
 
             AutoDeletion -> "${value}s"
+            History -> ""
         }
     }
 
@@ -124,5 +141,6 @@ enum class LocationPrivacyConfig {
 
 enum class LocationPrivacyConfigInterface {
     Switch,
-    Slider
+    Slider,
+    Fragment
 }

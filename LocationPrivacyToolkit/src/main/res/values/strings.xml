@@ -14,4 +14,7 @@
     <string name="autoDeletionTitle">Auto-Deletion</string>
     <string name="autoDeletionSubtitle">How long is your location info usable?</string>
     <string name="autoDeletionDescription">Using the auto-deletion-option, you can select whether and after what time your location data is deleted. This way your location-data will be invalidated automatically.</string>
+    <string name="historyTitle">Location History</string>
+    <string name="historySubtitle">Manage your previous locations</string>
+    <string name="historyDescription">Using the location history option, you can view and manage all of your previously obtained location data.</string>
 </resources>

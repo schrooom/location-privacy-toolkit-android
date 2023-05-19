@@ -3,6 +3,7 @@ package de.fh.muenster.locationprivacytoolkit.ui
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -52,6 +53,7 @@ class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAd
             when (config.userInterface) {
                 LocationPrivacyConfigInterface.Switch -> initSwitch(config, hasLocationAccess)
                 LocationPrivacyConfigInterface.Slider -> initSlider(config, hasLocationAccess)
+                LocationPrivacyConfigInterface.Fragment -> initFragment(config)
             }
 
             dataBinding.locationConfigTitleView.setOnClickListener { showConfigDetails(config) }
@@ -110,6 +112,18 @@ class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAd
             dataBinding.locationConfigChip.visibility = View.VISIBLE
         }
 
+        private fun initFragment(config: LocationPrivacyConfig) {
+            dataBinding.root.setOnClickListener {
+                config.fragment?.let {
+                    listener.fragmentManager?.beginTransaction()?.run {
+                        replace(android.R.id.content, it)
+                        addToBackStack(null)
+                        commit()
+                    }
+                }
+            }
+        }
+
         private fun updateCurrentState(config: LocationPrivacyConfig, value: Int?) {
             dataBinding.locationConfigChip.text = config.formatLabel(value ?: config.defaultValue)
         }
@@ -124,6 +138,7 @@ class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAd
     }
 
     interface LocationPrivacyConfigAdapterListener {
+        val fragmentManager: FragmentManager?
         fun onPrivacyConfigChanged(config: LocationPrivacyConfig, value: Int)
         fun getPrivacyConfigValue(config: LocationPrivacyConfig): Int
         fun refreshRecyclerView()

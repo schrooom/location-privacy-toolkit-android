@@ -300,6 +300,13 @@ class MainActivity : AppCompatActivity(), LocationListener, LocationPrivacyToolk
         }
     }
 
+    override fun onRemoveLocations(locations: List<Location>) {
+        if (this.lastLocations.removeAll(locations)) {
+            showMessage("${locations.count()} locations deleted")
+            updateMapLocations()
+        }
+    }
+
     override fun onRemoveLocationRange(fromTimestamp: Long, toTimestamp: Long) {
         if (this.lastLocations.removeAll { it.time in fromTimestamp..toTimestamp }) {
             val fromDate = dateFormat.format(Date(fromTimestamp))
