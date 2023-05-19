@@ -40,6 +40,10 @@ dependencies {
     implementation 'org.maplibre.gl:android-sdk:10.0.2'
     implementation 'org.maplibre.gl:android-sdk-turf:5.9.0'
 
+    // room database
+    implementation "androidx.room:room-runtime:2.5.1"
+    annotationProcessor "androidx.room:room-compiler:2.5.1"
+
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'

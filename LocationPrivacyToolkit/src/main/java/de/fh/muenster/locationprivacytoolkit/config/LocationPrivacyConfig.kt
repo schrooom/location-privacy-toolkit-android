@@ -4,11 +4,12 @@ import android.content.Context
 import androidx.fragment.app.Fragment
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkitListener
 import de.fh.muenster.locationprivacytoolkit.R
-import de.fh.muenster.locationprivacytoolkit.config.ui.LocationHistoryFragment
+import de.fh.muenster.locationprivacytoolkit.processors.ui.LocationHistoryFragment
 import de.fh.muenster.locationprivacytoolkit.processors.AbstractLocationProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.AccessProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.AccuracyProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.AutoDeletionProcessor
+import de.fh.muenster.locationprivacytoolkit.processors.HistoryProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.IntervalProcessor
 
 enum class LocationPrivacyConfig {
@@ -98,7 +99,7 @@ enum class LocationPrivacyConfig {
             Interval -> IntervalProcessor(context)
             Visibility -> null
             AutoDeletion -> AutoDeletionProcessor(context, listener)
-            History -> null
+            History -> HistoryProcessor(context, listener)
         }
     }
 

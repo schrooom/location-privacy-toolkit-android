@@ -1,4 +1,4 @@
-package de.fh.muenster.locationprivacytoolkit.config.ui
+package de.fh.muenster.locationprivacytoolkit.processors.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
