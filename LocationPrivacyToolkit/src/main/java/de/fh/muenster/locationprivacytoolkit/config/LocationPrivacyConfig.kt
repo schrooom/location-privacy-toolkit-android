@@ -17,11 +17,11 @@ import de.fh.muenster.locationprivacytoolkit.processors.ui.ExclusionZoneFragment
 
 enum class LocationPrivacyConfig {
     Access,
+    History,
+    ExclusionZone,
     Accuracy,
     AutoDeletion,
     Delay,
-    ExclusionZone,
-    History,
     Interval,
     Visibility;
 

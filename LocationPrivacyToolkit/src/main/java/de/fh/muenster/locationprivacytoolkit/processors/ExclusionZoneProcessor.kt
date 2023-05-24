@@ -22,7 +22,6 @@ class ExclusionZoneProcessor(context: Context) : AbstractLocationProcessor(conte
     override val sort = LocationProcessorSort.Low
 
     override fun manipulateLocation(location: Location, config: Int): Location? {
-        print("")
         val zones = exclusionZones ?: return location
 
         if (zones.isNotEmpty()) {
