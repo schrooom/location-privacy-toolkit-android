@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
@@ -19,14 +20,13 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfTransformation
+import de.fh.muenster.locationprivacytoolkit.R
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
 import de.fh.muenster.locationprivacytoolkit.databinding.FragmentExclusionZoneBinding
 import de.fh.muenster.locationprivacytoolkit.processors.ExclusionZone
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -119,9 +119,17 @@ class ExclusionZoneFragment : Fragment() {
 
     private fun removeAllZones() {
         CoroutineScope(Dispatchers.IO).launch {
+            val currentZones = loadExclusionZones()
             locationPrivacyConfig?.setPrivacyConfig(LocationPrivacyConfig.ExclusionZone, "")
             withContext(Dispatchers.Main) {
-                reloadExclusionZones()
+                binding.mapView.getMapAsync { map ->
+                    map.getStyle { style ->
+                        // remove zones
+                        style.removeLayer(ZONE_LAYER)
+                        style.removeSource(ZONE_SOURCE)
+                    }
+                }
+                showDeletionToast(currentZones)
             }
         }
     }
@@ -198,6 +206,26 @@ class ExclusionZoneFragment : Fragment() {
                 }
             }
         return null
+    }
+
+    private fun showDeletionToast(deletedZones: List<ExclusionZone>?) {
+        val snackbar =
+            Snackbar.make(binding.root, R.string.exclusionZonesDeletedMessage, Snackbar.LENGTH_LONG)
+        snackbar.setAction(
+            R.string.exclusionZonesDeleteUndo
+        ) {
+            CoroutineScope(Dispatchers.IO).launch {
+                val zonesJson = Gson().toJson(deletedZones)
+                locationPrivacyConfig?.setPrivacyConfig(
+                    LocationPrivacyConfig.ExclusionZone,
+                    zonesJson
+                )
+                withContext(Dispatchers.Main) {
+                    reloadExclusionZones()
+                }
+            }
+        }
+        snackbar.show()
     }
 
     companion object {
