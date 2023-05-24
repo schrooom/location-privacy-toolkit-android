@@ -9,21 +9,28 @@ import de.fh.muenster.locationprivacytoolkit.processors.AbstractLocationProcesso
 import de.fh.muenster.locationprivacytoolkit.processors.AccessProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.AccuracyProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.AutoDeletionProcessor
+import de.fh.muenster.locationprivacytoolkit.processors.DelayProcessor
+import de.fh.muenster.locationprivacytoolkit.processors.ExclusionZoneProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.HistoryProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.IntervalProcessor
+import de.fh.muenster.locationprivacytoolkit.processors.ui.ExclusionZoneFragment
 
 enum class LocationPrivacyConfig {
     Access,
     Accuracy,
-    Interval,
-    Visibility,
     AutoDeletion,
-    History;
+    Delay,
+    ExclusionZone,
+    History,
+    Interval,
+    Visibility;
 
     val titleId: Int
         get() = when (this) {
             Access -> R.string.accessTitle
             Accuracy -> R.string.accuracyTitle
+            Delay -> R.string.delayTitle
+            ExclusionZone -> R.string.exclusionZoneTitle
             Interval -> R.string.intervalTitle
             Visibility -> R.string.visibilityTitle
             AutoDeletion -> R.string.autoDeletionTitle
@@ -34,6 +41,8 @@ enum class LocationPrivacyConfig {
         get() = when (this) {
             Access -> R.string.accessSubtitle
             Accuracy -> R.string.accuracySubtitle
+            Delay -> R.string.delaySubtitle
+            ExclusionZone -> R.string.exclusionZoneSubtitle
             Interval -> R.string.intervalSubtitle
             Visibility -> R.string.visibilitySubtitle
             AutoDeletion -> R.string.autoDeletionSubtitle
@@ -44,6 +53,8 @@ enum class LocationPrivacyConfig {
         get() = when (this) {
             Access -> R.string.accessDescription
             Accuracy -> R.string.accuracyDescription
+            Delay -> R.string.delayDescription
+            ExclusionZone -> R.string.exclusionZoneDescription
             Interval -> R.string.intervalDescription
             Visibility -> R.string.visibilityDescription
             AutoDeletion -> R.string.autoDeletionDescription
@@ -54,6 +65,8 @@ enum class LocationPrivacyConfig {
         get() = when (this) {
             Access -> 0
             Accuracy -> 0
+            Delay -> 0
+            ExclusionZone -> 0
             Interval -> 0
             Visibility -> 0
             AutoDeletion -> 0
@@ -64,6 +77,8 @@ enum class LocationPrivacyConfig {
         get() = when (this) {
             Access -> arrayOf(0, 1)
             Accuracy -> arrayOf(1000, 500, 100, 0)
+            Delay -> arrayOf(1000, 300, 60, 10, 0)
+            ExclusionZone -> emptyArray()
             Interval -> arrayOf(1000, 600, 60, 0)
             Visibility -> arrayOf(0, 1, 2, 3)
             AutoDeletion -> arrayOf(1000, 600, 60, 0)
@@ -74,6 +89,8 @@ enum class LocationPrivacyConfig {
         get() = when (this) {
             Access -> LocationPrivacyConfigInterface.Switch
             Accuracy -> LocationPrivacyConfigInterface.Slider
+            Delay -> LocationPrivacyConfigInterface.Slider
+            ExclusionZone -> LocationPrivacyConfigInterface.Fragment
             Interval -> LocationPrivacyConfigInterface.Slider
             Visibility -> LocationPrivacyConfigInterface.Slider
             AutoDeletion -> LocationPrivacyConfigInterface.Slider
@@ -85,6 +102,7 @@ enum class LocationPrivacyConfig {
 
     val fragment: Fragment?
         get() = when (this) {
+            ExclusionZone -> ExclusionZoneFragment()
             History -> LocationHistoryFragment()
             else -> null
         }
@@ -96,6 +114,8 @@ enum class LocationPrivacyConfig {
         return when (this) {
             Access -> AccessProcessor(context)
             Accuracy -> AccuracyProcessor(context)
+            Delay -> DelayProcessor(context)
+            ExclusionZone -> ExclusionZoneProcessor(context)
             Interval -> IntervalProcessor(context)
             Visibility -> null
             AutoDeletion -> AutoDeletionProcessor(context, listener)
@@ -105,9 +125,9 @@ enum class LocationPrivacyConfig {
 
     fun formatLabel(value: Int): String {
         return when (this) {
-            Access -> ""
+            Access, ExclusionZone, History -> ""
             Accuracy -> "${value}m"
-            Interval -> "${value}s"
+            Interval, Delay, AutoDeletion -> "${value}s"
             Visibility -> {
                 when (value) {
                     1 -> "Friends"
@@ -116,9 +136,6 @@ enum class LocationPrivacyConfig {
                     else -> "None"
                 }
             }
-
-            AutoDeletion -> "${value}s"
-            History -> ""
         }
     }
 

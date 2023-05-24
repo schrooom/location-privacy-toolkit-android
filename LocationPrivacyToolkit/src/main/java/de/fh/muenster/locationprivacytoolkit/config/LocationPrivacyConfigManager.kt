@@ -22,6 +22,8 @@ internal class LocationPrivacyConfigManager(context: Context) {
     }
 
     fun getPrivacyConfig(key: LocationPrivacyConfig): Int? {
+        // TODO: remove workaround - dont specify exlcusionzones here
+        if (key == LocationPrivacyConfig.ExclusionZone) return -1
         return if (preferences.contains(key.name)) {
             preferences.getInt(key.name, -1)
         } else {
@@ -29,8 +31,20 @@ internal class LocationPrivacyConfigManager(context: Context) {
         }
     }
 
+    fun getPrivacyConfigString(key: LocationPrivacyConfig): String? {
+        return if (preferences.contains(key.name)) {
+            preferences.getString(key.name, "")
+        } else {
+            null
+        }
+    }
+
     fun setPrivacyConfig(key: LocationPrivacyConfig, value: Int) {
         preferences.edit { putInt(key.name, value) }
+    }
+
+    fun setPrivacyConfig(key: LocationPrivacyConfig, value: String) {
+        preferences.edit { putString(key.name, value) }
     }
 
     fun removePrivacyConfig(key: LocationPrivacyConfig) {
@@ -66,7 +80,7 @@ internal class LocationPrivacyConfigManager(context: Context) {
             val processors =
                 LocationPrivacyConfig.values()
                     .mapNotNull { c -> c.getLocationProcessor(context, listener) }
-            return processors.sortedBy { p -> p.sort }
+            return processors.sortedByDescending { p -> p.sort }
         }
     }
 }

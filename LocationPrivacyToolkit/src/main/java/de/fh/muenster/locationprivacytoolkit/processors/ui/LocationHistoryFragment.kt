@@ -8,12 +8,14 @@ import androidx.fragment.app.Fragment
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
+import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
 import de.fh.muenster.locationprivacytoolkit.databinding.FragmentLocationHistoryBinding
 
 
 class LocationHistoryFragment : Fragment() {
 
     private lateinit var binding: FragmentLocationHistoryBinding
+    private var locationPrivacyConfig: LocationPrivacyConfigManager? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -23,6 +25,7 @@ class LocationHistoryFragment : Fragment() {
         super.onCreate(savedInstanceState)
         context?.let {
             Mapbox.getInstance(it)
+            locationPrivacyConfig = LocationPrivacyConfigManager(it)
         }
 
         binding = FragmentLocationHistoryBinding.inflate(inflater, container, false)
