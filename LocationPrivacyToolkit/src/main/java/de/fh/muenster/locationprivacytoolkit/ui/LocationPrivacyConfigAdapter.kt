@@ -75,6 +75,8 @@ class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAd
             // enable, if location-access is enabled or if this is the button, to toggle location-access
             dataBinding.locationConfigSwitch.isEnabled = hasLocationAccess || isLocationAccessConfig
             dataBinding.locationConfigSwitch.visibility = View.VISIBLE
+            dataBinding.locationConfigSlider.visibility = View.GONE
+            dataBinding.locationConfigChip.visibility = View.GONE
         }
 
         private fun initSlider(config: LocationPrivacyConfig, hasLocationAccess: Boolean) {
@@ -110,9 +112,13 @@ class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAd
             dataBinding.locationConfigSlider.visibility = View.VISIBLE
             dataBinding.locationConfigChip.isEnabled = hasLocationAccess
             dataBinding.locationConfigChip.visibility = View.VISIBLE
+            dataBinding.locationConfigSwitch.visibility = View.GONE
         }
 
         private fun initFragment(config: LocationPrivacyConfig) {
+            dataBinding.locationConfigSlider.visibility = View.GONE
+            dataBinding.locationConfigChip.visibility = View.GONE
+            dataBinding.locationConfigSwitch.visibility = View.GONE
             dataBinding.root.setOnClickListener {
                 config.fragment?.let {
                     listener.fragmentManager?.beginTransaction()?.run {

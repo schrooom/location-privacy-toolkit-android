@@ -132,6 +132,7 @@ class ExclusionZoneFragment : Fragment() {
                 showDeletionToast(currentZones)
             }
         }
+        binding.removeZonesButton.visibility = View.GONE
     }
 
     private fun addZonesToMap(zones: List<ExclusionZone>) {
@@ -181,6 +182,7 @@ class ExclusionZoneFragment : Fragment() {
         zones?.let { addZonesToMap(it) } ?: run {
             isInitialView = false
         }
+        binding.removeZonesButton.visibility = if (zones?.isEmpty() != false) View.GONE else View.VISIBLE
     }
 
     private fun addExclusionZone(zone: ExclusionZone) {
