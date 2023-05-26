@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.fragment.app.Fragment
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkitListener
 import de.fh.muenster.locationprivacytoolkit.R
-import de.fh.muenster.locationprivacytoolkit.processors.ui.LocationHistoryFragment
+import de.fh.muenster.locationprivacytoolkit.processors.ui.HistoryProcessorFragment
 import de.fh.muenster.locationprivacytoolkit.processors.AbstractLocationProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.AccessProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.AccuracyProcessor
@@ -13,7 +13,7 @@ import de.fh.muenster.locationprivacytoolkit.processors.DelayProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.ExclusionZoneProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.HistoryProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.IntervalProcessor
-import de.fh.muenster.locationprivacytoolkit.processors.ui.ExclusionZoneFragment
+import de.fh.muenster.locationprivacytoolkit.processors.ui.ExclusionZoneProcessorFragment
 
 enum class LocationPrivacyConfig {
     Access,
@@ -102,8 +102,8 @@ enum class LocationPrivacyConfig {
 
     val fragment: Fragment?
         get() = when (this) {
-            ExclusionZone -> ExclusionZoneFragment()
-            History -> LocationHistoryFragment()
+            ExclusionZone -> ExclusionZoneProcessorFragment()
+            History -> HistoryProcessorFragment()
             else -> null
         }
 
