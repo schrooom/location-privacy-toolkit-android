@@ -2,10 +2,8 @@ package de.fh.muenster.locationprivacytoolkit.processors
 
 import android.content.Context
 import android.location.*
-import androidx.fragment.app.Fragment
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkitListener
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
-import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigInterface
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
 
 /**
@@ -19,25 +17,11 @@ abstract class AbstractLocationProcessor(
     context: Context,
     var listener: LocationPrivacyToolkitListener? = null
 ) {
-    // The configuration the subclass is processing. Must be implemented by subclass
-    abstract val configKey: LocationPrivacyConfig
 
     abstract val sort: LocationProcessorSort
 
-    // value-range and default-value
-    abstract val values: Array<Int>
-    abstract val defaultValue: Int
-    val range: IntRange
-        get() = IntRange(0, values.size - 1)
-
-    abstract val userInterface: LocationPrivacyConfigInterface
-    abstract val fragment: Fragment?
-
-    // various strings to show in UI
-    abstract val titleId: Int
-    abstract val subtitleId: Int
-    abstract val descriptionId: Int
-
+    // The configuration the subclass is processing. Must be implemented by subclass
+    abstract val configKey: LocationPrivacyConfig
 
     // The actual config from the LocationPrivacyConfig
     internal val locationPrivacyConfig: LocationPrivacyConfigManager =
