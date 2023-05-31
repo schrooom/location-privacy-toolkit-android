@@ -18,6 +18,9 @@
     <string name="exclusionZoneDescription">By defining exclusion zones, you can exclude chosen areas to be ignored for location tracking. This could for example be your home, of which you don\'t want to share the location to a location based service.</string>
     <string name="exclusionZonesDeletedMessage">Exclusion Zones deleted</string>
     <string name="exclusionZonesDeleteUndo">Undo</string>
+    <string name="exclusionZonesDelete">Delete Zones</string>
+    <string name="exclusionZonesCreate">Create Zone</string>
+    <string name="exclusionZonesCreateButton">Create</string>
     <string name="intervalTitle">Interval</string>
     <string name="intervalSubtitle">How often is your location accessed?</string>
     <string name="intervalDescription">Using the interval you can determine, how often this app is able to retrieve a new location from your device. A higher value therefore leads to a less frequent retrieval of your devices location. Example: If you\'ve set to 10 Minutes, this means a new location is at maximum retrieved every 10 Minutes. In the meantime the previously retrieved location is used, which of course it might up to 10 Minutes old, which could potentially degrade the service quality.</string>

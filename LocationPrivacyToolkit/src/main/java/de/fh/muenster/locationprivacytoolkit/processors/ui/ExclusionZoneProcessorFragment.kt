@@ -29,6 +29,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.roundToInt
 
 
 class ExclusionZoneProcessorFragment : Fragment() {
@@ -60,12 +61,30 @@ class ExclusionZoneProcessorFragment : Fragment() {
         }
 
         binding.addZoneButton.setOnClickListener {
-            createZone()
+            binding.exclusionZoneCard.visibility = View.VISIBLE
+            binding.addZoneButton.visibility = View.GONE
+            binding.removeZonesButton.visibility = View.GONE
         }
 
         binding.removeZonesButton.setOnClickListener {
             removeAllZones()
         }
+
+        binding.exclusionZoneCardCloseButton.setOnClickListener {
+            binding.exclusionZoneCard.visibility = View.GONE
+            binding.addZoneButton.visibility = View.VISIBLE
+            reloadExclusionZones()
+        }
+
+        binding.exclusionZoneCardCreateButton.setOnClickListener {
+            createZone()
+        }
+
+        binding.exclusionZoneSlider.valueFrom = MIN_ZONE_RADIUS
+        binding.exclusionZoneSlider.valueTo = MAX_ZONE_RADIUS
+        binding.exclusionZoneSlider.value = INITIAL_ZONE_RADIUS
+        binding.exclusionZoneSlider.stepSize = ZONE_STEP_SIZE
+        binding.exclusionZoneSlider.setLabelFormatter { value -> "${value.roundToInt()} m" }
 
         reloadExclusionZones()
 
@@ -111,7 +130,8 @@ class ExclusionZoneProcessorFragment : Fragment() {
     private fun createZone() {
         binding.mapView.getMapAsync { map ->
             map.cameraPosition.target?.let { center ->
-                val zone = ExclusionZone(center, 500)
+                val radius = binding.exclusionZoneSlider.value
+                val zone = ExclusionZone(center, radius.toInt())
                 addExclusionZone(zone)
             }
         }
@@ -155,9 +175,9 @@ class ExclusionZoneProcessorFragment : Fragment() {
                     setGeoJson(zonePolygonsGeometry)
                 })
                 val zoneLayer = FillLayer(ZONE_LAYER, ZONE_SOURCE).withProperties(
-                    PropertyFactory.fillColor(Color.RED),
+                    PropertyFactory.fillColor(CREATED_ZONE_COLOR),
                     PropertyFactory.fillOpacity(0.5f),
-                    PropertyFactory.fillOutlineColor(Color.RED),
+                    PropertyFactory.fillOutlineColor(CREATED_ZONE_COLOR),
                 )
                 style.addLayerBelow(zoneLayer, ZONE_LAYER)
 
@@ -238,6 +258,11 @@ class ExclusionZoneProcessorFragment : Fragment() {
         private const val INITIAL_LONGITUDE = 7.628202
         private const val INITIAL_ZOOM = 3.0
         private const val INITIAL_PADDING = 300
+
+        private const val MIN_ZONE_RADIUS = 100f
+        private const val INITIAL_ZONE_RADIUS = 300f
+        private const val MAX_ZONE_RADIUS = 2000f
+        private const val ZONE_STEP_SIZE = 10f
 
         private const val NEW_ZONE_COLOR = Color.RED
         private const val CREATED_ZONE_COLOR = Color.GRAY
