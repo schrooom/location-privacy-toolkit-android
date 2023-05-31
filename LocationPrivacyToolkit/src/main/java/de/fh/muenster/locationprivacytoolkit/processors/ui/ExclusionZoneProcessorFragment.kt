@@ -13,6 +13,7 @@ import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
 import com.mapbox.geojson.MultiPolygon
 import com.mapbox.geojson.Point
+import com.mapbox.geojson.Polygon
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -86,7 +87,9 @@ class ExclusionZoneProcessorFragment : Fragment() {
         binding.exclusionZoneSlider.value = INITIAL_ZONE_RADIUS
         binding.exclusionZoneSlider.stepSize = ZONE_STEP_SIZE
         binding.exclusionZoneSlider.setLabelFormatter { value -> "${value.roundToInt()} m" }
-
+        binding.exclusionZoneSlider.addOnChangeListener { _, _, _ ->
+            updateCreationZone(lastZoneCreationCenter)
+        }
         reloadExclusionZones()
 
         return binding.root
@@ -131,30 +134,59 @@ class ExclusionZoneProcessorFragment : Fragment() {
         binding.exclusionZoneCard.visibility = View.VISIBLE
         binding.addZoneButton.visibility = View.GONE
         binding.removeZonesButton.visibility = View.GONE
-
-        // show marker on map
+        
+        // add zone creation content to map
         binding.mapView.getMapAsync { map ->
             map.cameraPosition.target?.let { center ->
                 map.style?.let { style ->
+                    // add zone creation layer
+                    val zoneCreationCircle =
+                        createMapCircle(center, binding.exclusionZoneSlider.value.toDouble())
+                    style.addSource(GeoJsonSource(ZONE_CREATION_SOURCE).apply {
+                        setGeoJson(zoneCreationCircle)
+                    })
+                    val zoneCreationLayer =
+                        FillLayer(ZONE_CREATION_LAYER, ZONE_CREATION_SOURCE).withProperties(
+                            PropertyFactory.fillColor(NEW_ZONE_COLOR),
+                            PropertyFactory.fillOpacity(ZONE_LAYER_OPACITY),
+                            PropertyFactory.fillOutlineColor(NEW_ZONE_COLOR),
+                        )
+                    style.addLayer(zoneCreationLayer)
+
+                    // add zone creation marker
                     addImageToMap(style, ADD_ZONE_IMAGE, R.drawable.ic_add_location)
                     symbolManager = SymbolManager(binding.mapView, map, style)
                     symbolManager?.iconAllowOverlap = true
                     symbolManager?.iconIgnorePlacement = true
-                    val symbolOptions = SymbolOptions()
-                        .withLatLng(center)
-                        .withIconImage(ADD_ZONE_IMAGE)
-                        .withIconSize(2f)
-                        .withIconAnchor(ICON_ANCHOR_BOTTOM)
-                        .withDraggable(true)
+                    val symbolOptions =
+                        SymbolOptions().withLatLng(center).withIconImage(ADD_ZONE_IMAGE)
+                            .withIconSize(2f).withIconAnchor(ICON_ANCHOR_BOTTOM).withDraggable(true)
                     symbolManager?.create(symbolOptions)
                     lastZoneCreationCenter = center
                     symbolManager?.addDragListener(object : OnSymbolDragListener {
                         override fun onAnnotationDragStarted(annotation: Symbol) = Unit
-                        override fun onAnnotationDrag(annotation: Symbol) = Unit
+                        override fun onAnnotationDrag(annotation: Symbol) {
+                            updateCreationZone(annotation.latLng)
+                        }
+
                         override fun onAnnotationDragFinished(annotation: Symbol) {
                             lastZoneCreationCenter = annotation.latLng
                         }
                     })
+                }
+            }
+        }
+    }
+
+    private fun updateCreationZone(latLng: LatLng?) {
+        val position = latLng ?: return
+        binding.mapView.getMapAsync { map ->
+            map.style?.let { style ->
+                (style.getSource(ZONE_CREATION_SOURCE) as? GeoJsonSource)?.let { source ->
+                    val newCircle = createMapCircle(
+                        position, binding.exclusionZoneSlider.value.toDouble()
+                    )
+                    source.setGeoJson(newCircle)
                 }
             }
         }
@@ -171,7 +203,16 @@ class ExclusionZoneProcessorFragment : Fragment() {
     private fun hideZoneCreationOverlay() {
         binding.exclusionZoneCard.visibility = View.GONE
         binding.addZoneButton.visibility = View.VISIBLE
+
+        // remove zone creation content from map
         symbolManager?.deleteAll()
+        binding.mapView.getMapAsync { map ->
+            map.style?.let { style ->
+                // remove creation layer and source
+                style.removeLayer(ZONE_CREATION_LAYER)
+                style.removeSource(ZONE_CREATION_SOURCE)
+            }
+        }
         reloadExclusionZones()
     }
 
@@ -181,6 +222,7 @@ class ExclusionZoneProcessorFragment : Fragment() {
             val zone = ExclusionZone(center, radius.toInt())
             addExclusionZone(zone)
         }
+        hideZoneCreationOverlay()
     }
 
     private fun removeAllZones() {
@@ -210,11 +252,7 @@ class ExclusionZoneProcessorFragment : Fragment() {
 
                 // add new zones
                 val zonePolygons = zones.map { z ->
-                    TurfTransformation.circle(
-                        Point.fromLngLat(z.center.longitude, z.center.latitude),
-                        z.radiusMeters.toDouble(),
-                        TurfConstants.UNIT_METERS
-                    )
+                    createMapCircle(z.center, z.radiusMeters.toDouble())
                 }
                 val zonePolygonsGeometry = MultiPolygon.fromPolygons(zonePolygons)
                 style.addSource(GeoJsonSource(ZONE_SOURCE).apply {
@@ -222,7 +260,7 @@ class ExclusionZoneProcessorFragment : Fragment() {
                 })
                 val zoneLayer = FillLayer(ZONE_LAYER, ZONE_SOURCE).withProperties(
                     PropertyFactory.fillColor(CREATED_ZONE_COLOR),
-                    PropertyFactory.fillOpacity(0.5f),
+                    PropertyFactory.fillOpacity(ZONE_LAYER_OPACITY),
                     PropertyFactory.fillOutlineColor(CREATED_ZONE_COLOR),
                 )
                 style.addLayerBelow(zoneLayer, ZONE_LAYER)
@@ -230,10 +268,7 @@ class ExclusionZoneProcessorFragment : Fragment() {
                 if (isInitialView) {
                     isInitialView = false
                     val padding = intArrayOf(
-                        INITIAL_PADDING,
-                        INITIAL_PADDING,
-                        INITIAL_PADDING,
-                        INITIAL_PADDING
+                        INITIAL_PADDING, INITIAL_PADDING, INITIAL_PADDING, INITIAL_PADDING
                     )
                     map.getCameraForGeometry(zonePolygonsGeometry, padding)?.let { cameraPosition ->
                         map.cameraPosition = cameraPosition
@@ -241,6 +276,14 @@ class ExclusionZoneProcessorFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun createMapCircle(center: LatLng, radiusMeters: Double): Polygon {
+        return TurfTransformation.circle(
+            Point.fromLngLat(center.longitude, center.latitude),
+            radiusMeters,
+            TurfConstants.UNIT_METERS
+        )
     }
 
     private fun reloadExclusionZones() {
@@ -286,8 +329,7 @@ class ExclusionZoneProcessorFragment : Fragment() {
             CoroutineScope(Dispatchers.IO).launch {
                 val zonesJson = Gson().toJson(deletedZones)
                 locationPrivacyConfig?.setPrivacyConfig(
-                    LocationPrivacyConfig.ExclusionZone,
-                    zonesJson
+                    LocationPrivacyConfig.ExclusionZone, zonesJson
                 )
                 withContext(Dispatchers.Main) {
                     reloadExclusionZones()
@@ -310,11 +352,14 @@ class ExclusionZoneProcessorFragment : Fragment() {
         private const val MAX_ZONE_RADIUS = 10000f
         private const val ZONE_STEP_SIZE = 100f
 
-        private const val NEW_ZONE_COLOR = Color.RED
         private const val CREATED_ZONE_COLOR = Color.GRAY
         private const val ADD_ZONE_IMAGE = "add_zone_image"
         private const val ZONE_LAYER = "exclusion_zone_layer"
         private const val ZONE_SOURCE = "exclusion_zone_source"
+        private const val NEW_ZONE_COLOR = Color.RED
+        private const val ZONE_CREATION_LAYER = "exclusion_zone_creation_layer"
+        private const val ZONE_CREATION_SOURCE = "exclusion_zone_creation_source"
+        private const val ZONE_LAYER_OPACITY = 0.5f
 
         // replace with proper style, if available
         private const val TILE_SERVER = "https://demotiles.maplibre.org/style.json"
