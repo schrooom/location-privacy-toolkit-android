@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
@@ -15,7 +16,13 @@ import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.plugins.annotation.OnSymbolDragListener
+import com.mapbox.mapboxsdk.plugins.annotation.Symbol
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import com.mapbox.mapboxsdk.style.layers.FillLayer
+import com.mapbox.mapboxsdk.style.layers.Property.ICON_ANCHOR_BOTTOM
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.turf.TurfConstants
@@ -36,6 +43,8 @@ class ExclusionZoneProcessorFragment : Fragment() {
 
     private lateinit var binding: FragmentExclusionZoneBinding
     private var locationPrivacyConfig: LocationPrivacyConfigManager? = null
+    private var symbolManager: SymbolManager? = null
+    private var lastZoneCreationCenter: LatLng? = null
     private var isInitialView = true
 
     override fun onCreateView(
@@ -61,25 +70,17 @@ class ExclusionZoneProcessorFragment : Fragment() {
         }
 
         binding.addZoneButton.setOnClickListener {
-            binding.exclusionZoneCard.visibility = View.VISIBLE
-            binding.addZoneButton.visibility = View.GONE
-            binding.removeZonesButton.visibility = View.GONE
+            showZoneCreationOverlay()
         }
-
         binding.removeZonesButton.setOnClickListener {
             removeAllZones()
         }
-
         binding.exclusionZoneCardCloseButton.setOnClickListener {
-            binding.exclusionZoneCard.visibility = View.GONE
-            binding.addZoneButton.visibility = View.VISIBLE
-            reloadExclusionZones()
+            hideZoneCreationOverlay()
         }
-
         binding.exclusionZoneCardCreateButton.setOnClickListener {
             createZone()
         }
-
         binding.exclusionZoneSlider.valueFrom = MIN_ZONE_RADIUS
         binding.exclusionZoneSlider.valueTo = MAX_ZONE_RADIUS
         binding.exclusionZoneSlider.value = INITIAL_ZONE_RADIUS
@@ -90,7 +91,6 @@ class ExclusionZoneProcessorFragment : Fragment() {
 
         return binding.root
     }
-
 
     override fun onStart() {
         super.onStart()
@@ -127,13 +127,59 @@ class ExclusionZoneProcessorFragment : Fragment() {
         binding.mapView.onDestroy()
     }
 
-    private fun createZone() {
+    private fun showZoneCreationOverlay() {
+        binding.exclusionZoneCard.visibility = View.VISIBLE
+        binding.addZoneButton.visibility = View.GONE
+        binding.removeZonesButton.visibility = View.GONE
+
+        // show marker on map
         binding.mapView.getMapAsync { map ->
             map.cameraPosition.target?.let { center ->
-                val radius = binding.exclusionZoneSlider.value
-                val zone = ExclusionZone(center, radius.toInt())
-                addExclusionZone(zone)
+                map.style?.let { style ->
+                    addImageToMap(style, ADD_ZONE_IMAGE, R.drawable.ic_add_location)
+                    symbolManager = SymbolManager(binding.mapView, map, style)
+                    symbolManager?.iconAllowOverlap = true
+                    symbolManager?.iconIgnorePlacement = true
+                    val symbolOptions = SymbolOptions()
+                        .withLatLng(center)
+                        .withIconImage(ADD_ZONE_IMAGE)
+                        .withIconSize(2f)
+                        .withIconAnchor(ICON_ANCHOR_BOTTOM)
+                        .withDraggable(true)
+                    symbolManager?.create(symbolOptions)
+                    lastZoneCreationCenter = center
+                    symbolManager?.addDragListener(object : OnSymbolDragListener {
+                        override fun onAnnotationDragStarted(annotation: Symbol) = Unit
+                        override fun onAnnotationDrag(annotation: Symbol) = Unit
+                        override fun onAnnotationDragFinished(annotation: Symbol) {
+                            lastZoneCreationCenter = annotation.latLng
+                        }
+                    })
+                }
             }
+        }
+    }
+
+    private fun addImageToMap(style: Style, id: String, resId: Int) {
+        context?.let { c ->
+            AppCompatResources.getDrawable(c, resId)?.let { image ->
+                style.addImage(id, image)
+            }
+        }
+    }
+
+    private fun hideZoneCreationOverlay() {
+        binding.exclusionZoneCard.visibility = View.GONE
+        binding.addZoneButton.visibility = View.VISIBLE
+        symbolManager?.deleteAll()
+        reloadExclusionZones()
+    }
+
+    private fun createZone() {
+        lastZoneCreationCenter?.let { center ->
+            val radius = binding.exclusionZoneSlider.value
+            val zone = ExclusionZone(center, radius.toInt())
+            addExclusionZone(zone)
         }
     }
 
@@ -260,12 +306,13 @@ class ExclusionZoneProcessorFragment : Fragment() {
         private const val INITIAL_PADDING = 300
 
         private const val MIN_ZONE_RADIUS = 100f
-        private const val INITIAL_ZONE_RADIUS = 300f
-        private const val MAX_ZONE_RADIUS = 2000f
-        private const val ZONE_STEP_SIZE = 10f
+        private const val INITIAL_ZONE_RADIUS = 500f
+        private const val MAX_ZONE_RADIUS = 10000f
+        private const val ZONE_STEP_SIZE = 100f
 
         private const val NEW_ZONE_COLOR = Color.RED
         private const val CREATED_ZONE_COLOR = Color.GRAY
+        private const val ADD_ZONE_IMAGE = "add_zone_image"
         private const val ZONE_LAYER = "exclusion_zone_layer"
         private const val ZONE_SOURCE = "exclusion_zone_source"
 

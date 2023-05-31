@@ -19,7 +19,7 @@
     <string name="exclusionZonesDeletedMessage">Exclusion Zones deleted</string>
     <string name="exclusionZonesDeleteUndo">Undo</string>
     <string name="exclusionZonesDelete">Delete Zones</string>
-    <string name="exclusionZonesCreate">Create Zone</string>
+    <string name="exclusionZonesCreate">Create Exclusion Zone</string>
     <string name="exclusionZonesCreateButton">Create</string>
     <string name="intervalTitle">Interval</string>
     <string name="intervalSubtitle">How often is your location accessed?</string>
