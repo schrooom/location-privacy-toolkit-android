@@ -49,7 +49,7 @@ abstract class AbstractLocationProcessor(
             return null
         }
         // get config or return location if config is null
-        val config = configValue ?: return location
+        val config = configValue ?: -1
 
         return this.manipulateLocation(location, config)
     }

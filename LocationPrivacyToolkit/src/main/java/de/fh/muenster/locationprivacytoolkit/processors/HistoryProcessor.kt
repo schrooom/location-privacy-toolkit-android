@@ -4,19 +4,18 @@ import android.content.Context
 import android.location.Location
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkitListener
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
+import de.fh.muenster.locationprivacytoolkit.processors.utils.LocationPrivacyDatabase
 
-class HistoryProcessor(context: Context, listener: LocationPrivacyToolkitListener?): AbstractLocationProcessor(context, listener) {
+class HistoryProcessor(context: Context, listener: LocationPrivacyToolkitListener?) :
+    AbstractLocationProcessor(context, listener) {
 
     override val configKey = LocationPrivacyConfig.History
     override val sort = LocationProcessorSort.Low
 
-    override fun manipulateLocation(location: Location, config: Int): Location {
-        // TODO: write location into database
-        return location
-    }
+    private val locationDatabase = LocationPrivacyDatabase.sharedInstance
 
-    fun removeLocations(locations: List<Location>) {
-        // TODO: remove locations
-        listener?.onRemoveLocations(locations)
+    override fun manipulateLocation(location: Location, config: Int): Location {
+        locationDatabase.add(location)
+        return location
     }
 }
