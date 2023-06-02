@@ -6,13 +6,13 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground">
 
         <LinearLayout
             android:id="@+id/locationConfigTitleView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="?android:attr/selectableItemBackground"
             android:orientation="vertical"
             android:paddingHorizontal="16dp"
             android:paddingVertical="16dp"
@@ -28,6 +28,7 @@
                 android:layout_height="wrap_content"
                 android:drawableEnd="@drawable/ic_info"
                 android:drawablePadding="8dp"
+                android:background="?android:attr/selectableItemBackground"
                 android:textAlignment="textStart"
                 android:textSize="18sp" />
 

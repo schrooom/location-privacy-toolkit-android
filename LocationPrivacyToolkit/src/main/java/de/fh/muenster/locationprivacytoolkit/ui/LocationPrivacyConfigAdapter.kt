@@ -56,7 +56,7 @@ class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAd
                 LocationPrivacyConfigInterface.Fragment -> initFragment(config)
             }
 
-            dataBinding.locationConfigTitleView.setOnClickListener { showConfigDetails(config) }
+            dataBinding.locationConfigTitle.setOnClickListener { showConfigDetails(config) }
         }
 
         private fun initSwitch(config: LocationPrivacyConfig, hasLocationAccess: Boolean) {

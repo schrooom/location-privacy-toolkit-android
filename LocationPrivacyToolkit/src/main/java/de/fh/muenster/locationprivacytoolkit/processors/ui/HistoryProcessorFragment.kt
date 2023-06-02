@@ -7,24 +7,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.mapbox.geojson.Feature
-import com.mapbox.geojson.FeatureCollection
+import com.mapbox.geojson.MultiPoint
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.style.layers.CircleLayer
+import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
 import de.fh.muenster.locationprivacytoolkit.databinding.FragmentLocationHistoryBinding
 import de.fh.muenster.locationprivacytoolkit.processors.utils.LocationPrivacyDatabase
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class HistoryProcessorFragment : Fragment() {
@@ -32,6 +31,7 @@ class HistoryProcessorFragment : Fragment() {
     private lateinit var binding: FragmentLocationHistoryBinding
     private var locationPrivacyConfig: LocationPrivacyConfigManager? = null
     private val locationDatabase = LocationPrivacyDatabase.sharedInstance
+    private var lastLocations: List<Location>? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -43,29 +43,33 @@ class HistoryProcessorFragment : Fragment() {
         }
 
         binding = FragmentLocationHistoryBinding.inflate(inflater, container, false)
-
-        loadLocations()
+        binding.mapView.getMapAsync { map ->
+            map.setStyle(TILE_SERVER)
+            loadLocations()
+        }
 
         return binding.root
     }
 
     private fun loadLocations() {
-        GlobalScope.launch {
-            val locations = locationDatabase.locations
-            CoroutineScope(this.coroutineContext).launch {
-                if (locations.isNotEmpty()) {
-                    addLocationsToMap(locations)
-                } else {
-                    binding.mapView.getMapAsync { map ->
-                        map.setStyle(TILE_SERVER)
-                        val initialLatLng = LatLng(
-                            INITIAL_LATITUDE, INITIAL_LONGITUDE
-                        )
-                        val camera = CameraUpdateFactory.newLatLngZoom(
-                            initialLatLng, INITIAL_ZOOM
-                        )
-                        map.easeCamera(camera)
+        CoroutineScope(Dispatchers.IO).launch {
+            lastLocations = locationDatabase.locations
+            withContext(Dispatchers.Main) {
+                lastLocations?.let { locations ->
+                    if (locations.isNotEmpty()) {
+                        addLocationsToMap(locations)
+                        return@withContext
                     }
+                }
+                // fallback: default initial zoom
+                binding.mapView.getMapAsync { map ->
+                    val initialLatLng = LatLng(
+                        INITIAL_LATITUDE, INITIAL_LONGITUDE
+                    )
+                    val camera = CameraUpdateFactory.newLatLngZoom(
+                        initialLatLng, INITIAL_ZOOM
+                    )
+                    map.easeCamera(camera)
                 }
             }
         }
@@ -76,24 +80,25 @@ class HistoryProcessorFragment : Fragment() {
             map.style?.let { style ->
                 // add locations  layer
                 val locationPoints = locations.map { l ->
-                    Feature.fromGeometry(
-                        Point.fromLngLat(
-                            l.longitude, l.latitude
-                        )
+                    Point.fromLngLat(
+                        l.longitude, l.latitude
                     )
                 }
+                val locationMultiPoint = MultiPoint.fromLngLats(locationPoints)
                 style.addSource(GeoJsonSource(LOCATIONS_SOURCE).apply {
-                    setGeoJson(FeatureCollection.fromFeatures(locationPoints))
+                    setGeoJson(locationMultiPoint)
                 })
                 val locationsLayer = CircleLayer(LOCATIONS_LAYER, LOCATIONS_SOURCE).withProperties(
                     PropertyFactory.circleColor(LOCATIONS_COLOR),
                     PropertyFactory.circleRadius(LOCATIONS_SIZE),
+                    PropertyFactory.circleOpacity(LOCATIONS_OPACITY),
+                    PropertyFactory.circlePitchAlignment(Property.CIRCLE_PITCH_ALIGNMENT_MAP),
                     PropertyFactory.circleStrokeColor(LOCATIONS_STROKE_COLOR),
                     PropertyFactory.circleStrokeWidth(LOCATIONS_STROKE_SIZE)
                 )
                 style.addLayer(locationsLayer)
                 val bounds = LatLngBounds.fromLatLngs(locations.map { l -> LatLng(l) })
-                val update = CameraUpdateFactory.newLatLngBounds(bounds, 0)
+                val update = CameraUpdateFactory.newLatLngBounds(bounds, LOCATIONS_PADDING)
                 map.easeCamera(update)
             }
         }
@@ -145,8 +150,10 @@ class HistoryProcessorFragment : Fragment() {
         private const val LOCATIONS_SOURCE = "exclusion_zone_source"
         private const val LOCATIONS_COLOR = Color.BLUE
         private const val LOCATIONS_STROKE_COLOR = Color.WHITE
-        private const val LOCATIONS_SIZE = 20f
-        private const val LOCATIONS_STROKE_SIZE = 1f
+        private const val LOCATIONS_SIZE = 8f
+        private const val LOCATIONS_OPACITY = 0.7f
+        private const val LOCATIONS_STROKE_SIZE = 2f
+        private const val LOCATIONS_PADDING = 100
 
         // replace with proper style, if available
         private const val TILE_SERVER = "https://demotiles.maplibre.org/style.json"
