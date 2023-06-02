@@ -14,6 +14,8 @@ import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.style.layers.CircleLayer
+import com.mapbox.mapboxsdk.style.layers.HeatmapLayer
+import com.mapbox.mapboxsdk.style.layers.Layer
 import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
@@ -25,6 +27,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+private enum class HistoryMapMode {
+    Points,
+    Heatmap
+}
 
 class HistoryProcessorFragment : Fragment() {
 
@@ -32,6 +38,8 @@ class HistoryProcessorFragment : Fragment() {
     private var locationPrivacyConfig: LocationPrivacyConfigManager? = null
     private val locationDatabase = LocationPrivacyDatabase.sharedInstance
     private var lastLocations: List<Location>? = null
+    private var isLayersFabExtended = false
+    private var mapMode = HistoryMapMode.Points
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -46,6 +54,38 @@ class HistoryProcessorFragment : Fragment() {
         binding.mapView.getMapAsync { map ->
             map.setStyle(TILE_SERVER)
             loadLocations()
+        }
+
+        binding.timeLineLayerFab.visibility = View.GONE
+        binding.heatmapLayerFab.visibility = View.GONE
+        binding.layersFab.setOnClickListener {
+            if (isLayersFabExtended) {
+                isLayersFabExtended = false
+                binding.timeLineLayerFab.hide()
+                binding.heatmapLayerFab.hide()
+                binding.layersFab.shrink()
+            } else {
+                isLayersFabExtended = true
+                binding.timeLineLayerFab.show()
+                binding.heatmapLayerFab.show()
+                binding.layersFab.extend()
+            }
+        }
+
+        binding.timeLineLayerFab.setOnClickListener {
+            val locations = lastLocations ?: return@setOnClickListener
+            if (mapMode != HistoryMapMode.Points) {
+                mapMode = HistoryMapMode.Points
+                addLocationsToMap(locations)
+            }
+        }
+
+        binding.heatmapLayerFab.setOnClickListener {
+            val locations = lastLocations ?: return@setOnClickListener
+            if (mapMode != HistoryMapMode.Heatmap) {
+                mapMode = HistoryMapMode.Heatmap
+                addLocationsToMap(locations)
+            }
         }
 
         return binding.root
@@ -85,22 +125,37 @@ class HistoryProcessorFragment : Fragment() {
                     )
                 }
                 val locationMultiPoint = MultiPoint.fromLngLats(locationPoints)
-                style.addSource(GeoJsonSource(LOCATIONS_SOURCE).apply {
-                    setGeoJson(locationMultiPoint)
-                })
-                val locationsLayer = CircleLayer(LOCATIONS_LAYER, LOCATIONS_SOURCE).withProperties(
-                    PropertyFactory.circleColor(LOCATIONS_COLOR),
-                    PropertyFactory.circleRadius(LOCATIONS_SIZE),
-                    PropertyFactory.circleOpacity(LOCATIONS_OPACITY),
-                    PropertyFactory.circlePitchAlignment(Property.CIRCLE_PITCH_ALIGNMENT_MAP),
-                    PropertyFactory.circleStrokeColor(LOCATIONS_STROKE_COLOR),
-                    PropertyFactory.circleStrokeWidth(LOCATIONS_STROKE_SIZE)
-                )
+                style.getSourceAs<GeoJsonSource>(LOCATIONS_SOURCE)?.setGeoJson(locationMultiPoint)
+                    ?: run {
+                        style.addSource(GeoJsonSource(LOCATIONS_SOURCE).apply {
+                            setGeoJson(locationMultiPoint)
+                        })
+                    }
+                style.removeLayer(LOCATIONS_LAYER)
+                val locationsLayer = createLocationsLayer()
                 style.addLayer(locationsLayer)
                 val bounds = LatLngBounds.fromLatLngs(locations.map { l -> LatLng(l) })
                 val update = CameraUpdateFactory.newLatLngBounds(bounds, LOCATIONS_PADDING)
                 map.easeCamera(update)
             }
+        }
+    }
+
+    private fun createLocationsLayer(): Layer {
+        return when (mapMode) {
+            HistoryMapMode.Points -> CircleLayer(LOCATIONS_LAYER, LOCATIONS_SOURCE).withProperties(
+                PropertyFactory.circleColor(LOCATIONS_COLOR),
+                PropertyFactory.circleRadius(LOCATIONS_SIZE),
+                PropertyFactory.circleOpacity(LOCATIONS_OPACITY),
+                PropertyFactory.circlePitchAlignment(Property.CIRCLE_PITCH_ALIGNMENT_MAP),
+                PropertyFactory.circleStrokeColor(LOCATIONS_STROKE_COLOR),
+                PropertyFactory.circleStrokeWidth(LOCATIONS_STROKE_SIZE)
+            )
+
+            HistoryMapMode.Heatmap -> HeatmapLayer(
+                LOCATIONS_LAYER,
+                LOCATIONS_SOURCE
+            )
         }
     }
 
