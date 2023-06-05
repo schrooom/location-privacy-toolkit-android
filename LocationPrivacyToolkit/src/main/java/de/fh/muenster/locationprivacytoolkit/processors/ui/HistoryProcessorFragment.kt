@@ -57,17 +57,25 @@ class HistoryProcessorFragment : Fragment() {
         }
 
         binding.timeLineLayerFab.visibility = View.GONE
+        binding.timeLineLayerFabText.visibility = View.GONE
         binding.heatmapLayerFab.visibility = View.GONE
+        binding.heatmapLayerFabText.visibility = View.GONE
+        binding.layersFab.shrink()
+
         binding.layersFab.setOnClickListener {
             if (isLayersFabExtended) {
                 isLayersFabExtended = false
                 binding.timeLineLayerFab.hide()
                 binding.heatmapLayerFab.hide()
                 binding.layersFab.shrink()
+                binding.timeLineLayerFabText.visibility = View.GONE
+                binding.heatmapLayerFabText.visibility = View.GONE
             } else {
                 isLayersFabExtended = true
                 binding.timeLineLayerFab.show()
                 binding.heatmapLayerFab.show()
+                binding.timeLineLayerFabText.visibility = View.VISIBLE
+                binding.heatmapLayerFabText.visibility = View.VISIBLE
                 binding.layersFab.extend()
             }
         }
@@ -116,6 +124,7 @@ class HistoryProcessorFragment : Fragment() {
     }
 
     private fun addLocationsToMap(locations: List<Location>) {
+        if (locations.isEmpty()) return
         binding.mapView.getMapAsync { map ->
             map.style?.let { style ->
                 // add locations  layer

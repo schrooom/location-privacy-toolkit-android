@@ -33,7 +33,7 @@
     <string name="historyTitle">Location History</string>
     <string name="historySubtitle">Manage your previous locations</string>
     <string name="historyDescription">Using the location history option, you can view and manage all of your previously obtained location data.</string>
-    <string name="historyMapLayer">Map Layer</string>
+    <string name="historyMapLayer">Map Layers</string>
     <string name="historyMapLayerTimeline">Timeline</string>
     <string name="historyMapLayerHeatmap">Heatmap</string>
 </resources>

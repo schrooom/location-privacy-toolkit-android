@@ -25,6 +25,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:contentDescription="@string/historyMapLayer"
+            android:text="@string/historyMapLayer"
             app:icon="@drawable/ic_layer"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -34,26 +35,45 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
             android:contentDescription="@string/historyMapLayerTimeline"
-            android:text="@string/historyMapLayerTimeline"
             app:fabSize="mini"
-            app:layout_constraintEnd_toEndOf="@id/layersFab"
-            app:layout_constraintStart_toStartOf="@id/layersFab"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/layersFab"
             app:srcCompat="@drawable/ic_timeline" />
+
+        <TextView
+            android:id="@+id/timeLineLayerFabText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="@string/historyMapLayerTimeline"
+            app:layout_constraintBottom_toBottomOf="@+id/timeLineLayerFab"
+            app:layout_constraintEnd_toStartOf="@+id/timeLineLayerFab"
+            app:layout_constraintTop_toTopOf="@+id/timeLineLayerFab" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/heatmapLayerFab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
             android:contentDescription="@string/historyMapLayerHeatmap"
             android:text="@string/historyMapLayerHeatmap"
             app:fabSize="mini"
-            app:layout_constraintEnd_toEndOf="@id/layersFab"
-            app:layout_constraintStart_toStartOf="@id/layersFab"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/timeLineLayerFab"
             app:srcCompat="@drawable/ic_thermostat" />
+
+        <TextView
+            android:id="@+id/heatmapLayerFabText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="@string/historyMapLayerHeatmap"
+            app:layout_constraintBottom_toBottomOf="@+id/heatmapLayerFab"
+            app:layout_constraintEnd_toStartOf="@+id/heatmapLayerFab"
+            app:layout_constraintTop_toTopOf="@+id/heatmapLayerFab" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
