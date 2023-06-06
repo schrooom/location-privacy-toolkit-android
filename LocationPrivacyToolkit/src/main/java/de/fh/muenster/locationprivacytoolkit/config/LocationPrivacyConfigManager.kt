@@ -8,24 +8,21 @@ import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkitListener
 import de.fh.muenster.locationprivacytoolkit.processors.AbstractLocationProcessor
+import java.lang.Exception
 import java.lang.ref.WeakReference
 
 internal class LocationPrivacyConfigManager(context: Context) {
 
-    private val preferences: SharedPreferences
-    private val contextReference: WeakReference<Context>
-
-    init {
-        contextReference = WeakReference(context)
-        preferences =
-            context.getSharedPreferences(LOCATION_PRIVACY_PREFERENCES, Context.MODE_PRIVATE)
-    }
+    private val preferences =
+        context.getSharedPreferences(LOCATION_PRIVACY_PREFERENCES, Context.MODE_PRIVATE)
 
     fun getPrivacyConfig(key: LocationPrivacyConfig): Int? {
-        // TODO: remove workaround - dont specify exlcusionzones here
-        if (key == LocationPrivacyConfig.ExclusionZone) return -1
         return if (preferences.contains(key.name)) {
-            preferences.getInt(key.name, -1)
+            try {
+                preferences.getInt(key.name, -1)
+            } catch (e: Exception) {
+                null
+            }
         } else {
             null
         }
@@ -40,15 +37,15 @@ internal class LocationPrivacyConfigManager(context: Context) {
     }
 
     fun setPrivacyConfig(key: LocationPrivacyConfig, value: Int) {
-        preferences.edit { putInt(key.name, value) }
+        preferences.edit(commit = true) { putInt(key.name, value) }
     }
 
     fun setPrivacyConfig(key: LocationPrivacyConfig, value: String) {
-        preferences.edit { putString(key.name, value) }
+        preferences.edit(commit = true) { putString(key.name, value) }
     }
 
     fun removePrivacyConfig(key: LocationPrivacyConfig) {
-        preferences.edit { remove(key.name) }
+        preferences.edit(commit = true) { remove(key.name) }
     }
 
     fun getLastLocation(): Location? {
@@ -66,7 +63,7 @@ internal class LocationPrivacyConfigManager(context: Context) {
 
     fun setLastLocation(location: Location?) {
         val jsonLocation = Gson().toJson(location)
-        preferences.edit { putString(LAST_LOCATION_KEY, jsonLocation) }
+        preferences.edit(commit = true) { putString(LAST_LOCATION_KEY, jsonLocation) }
     }
 
     companion object {

@@ -8,6 +8,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.google.android.material.snackbar.Snackbar
+import com.google.gson.Gson
 import com.mapbox.geojson.MultiPoint
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
@@ -21,6 +23,8 @@ import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkit
+import de.fh.muenster.locationprivacytoolkit.R
+import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
 import de.fh.muenster.locationprivacytoolkit.databinding.FragmentLocationHistoryBinding
 import de.fh.muenster.locationprivacytoolkit.processors.utils.LocationPrivacyDatabase
@@ -37,11 +41,11 @@ private enum class HistoryMapMode {
 class HistoryProcessorFragment : Fragment() {
 
     private lateinit var binding: FragmentLocationHistoryBinding
+    private lateinit var locationDatabase: LocationPrivacyDatabase
     private var locationPrivacyConfig: LocationPrivacyConfigManager? = null
-    private val locationDatabase = LocationPrivacyDatabase.sharedInstance
     private var lastLocations: List<Location>? = null
     private var isLayersFabExtended = false
-    private var mapMode = HistoryMapMode.Timeline
+    private var mapMode: HistoryMapMode = HistoryMapMode.Timeline
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -52,6 +56,7 @@ class HistoryProcessorFragment : Fragment() {
             locationPrivacyConfig = LocationPrivacyConfigManager(it)
         }
 
+        locationDatabase = LocationPrivacyDatabase(context)
         binding = FragmentLocationHistoryBinding.inflate(inflater, container, false)
         binding.mapView.getMapAsync { map ->
             map.setStyle(LocationPrivacyToolkit.mapTilesUrl)
@@ -97,6 +102,10 @@ class HistoryProcessorFragment : Fragment() {
             changeMapMode(HistoryMapMode.Heatmap)
         }
 
+        binding.removeFab.setOnClickListener {
+            removePersistedLocations()
+        }
+
         return binding.root
     }
 
@@ -124,7 +133,7 @@ class HistoryProcessorFragment : Fragment() {
 
     private fun loadLocations() {
         CoroutineScope(Dispatchers.IO).launch {
-            lastLocations = locationDatabase.locations
+            lastLocations = locationDatabase.loadLocations()
             withContext(Dispatchers.Main) {
                 lastLocations?.let { locations ->
                     if (locations.isNotEmpty()) {
@@ -144,6 +153,21 @@ class HistoryProcessorFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun removePersistedLocations() {
+        val oldLocations = locationDatabase.loadLocations()
+        locationDatabase.removeAll()
+        val snackbar =
+            Snackbar.make(binding.root, R.string.historyDeletedMessage, Snackbar.LENGTH_LONG)
+        snackbar.setAction(
+            R.string.exclusionZonesDeleteUndo
+        ) {
+            CoroutineScope(Dispatchers.IO).launch {
+                locationDatabase.add(oldLocations)
+            }
+        }
+        snackbar.show()
     }
 
     private fun addLocationsToMap(locations: List<Location>) {

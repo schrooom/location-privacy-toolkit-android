@@ -36,4 +36,7 @@
     <string name="historyMapLayer">Map Layers</string>
     <string name="historyMapLayerTimeline">Timeline</string>
     <string name="historyMapLayerHeatmap">Heatmap</string>
+    <string name="historyDeletedMessage">Locations deleted</string>
+    <string name="historyDeleteUndo">Undo</string>
+    <string name="historyDelete">Delete Locations</string>
 </resources>
