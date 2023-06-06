@@ -173,6 +173,10 @@ class LocationPrivacyToolkit(
         internalListeners.forEach { it.onLocationChanged(processedLocation) }
         internalPendingIntents.forEach { /* TODO */ }
     }
+
+    companion object {
+        var mapTilesUrl: String = "https://demotiles.maplibre.org/style.json"
+    }
 }
 
 interface LocationPrivacyToolkitListener {

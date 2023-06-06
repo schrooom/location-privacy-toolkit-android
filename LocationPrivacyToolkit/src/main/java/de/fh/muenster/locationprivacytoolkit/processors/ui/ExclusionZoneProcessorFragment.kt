@@ -29,6 +29,7 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfTransformation
+import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkit
 import de.fh.muenster.locationprivacytoolkit.R
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
@@ -61,7 +62,7 @@ class ExclusionZoneProcessorFragment : Fragment() {
         binding = FragmentExclusionZoneBinding.inflate(inflater, container, false)
 
         binding.mapView.getMapAsync { map ->
-            map.setStyle(TILE_SERVER)
+            map.setStyle(LocationPrivacyToolkit.mapTilesUrl)
             val initialLatLng = LatLng(
                 INITIAL_LATITUDE, INITIAL_LONGITUDE
             )
@@ -377,8 +378,5 @@ class ExclusionZoneProcessorFragment : Fragment() {
         private const val ZONE_CREATION_LAYER = "exclusion_zone_creation_layer"
         private const val ZONE_CREATION_OUTLINE_LAYER = "exclusion_zone_creation_outline_layer"
         private const val ZONE_CREATION_SOURCE = "exclusion_zone_creation_source"
-
-        // replace with proper style, if available
-        private const val TILE_SERVER = "https://demotiles.maplibre.org/style.json"
     }
 }

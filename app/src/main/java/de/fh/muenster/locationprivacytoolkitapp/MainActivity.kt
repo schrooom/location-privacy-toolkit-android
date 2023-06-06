@@ -46,6 +46,7 @@ class MainActivity : AppCompatActivity(), LocationListener, LocationPrivacyToolk
         super.onCreate(savedInstanceState)
         Mapbox.getInstance(this)
         locationToolkit = LocationPrivacyToolkit(applicationContext, this)
+        LocationPrivacyToolkit.mapTilesUrl = TILE_SERVER
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

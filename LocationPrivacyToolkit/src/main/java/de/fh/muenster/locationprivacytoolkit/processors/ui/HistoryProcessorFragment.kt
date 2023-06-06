@@ -20,6 +20,7 @@ import com.mapbox.mapboxsdk.style.layers.Layer
 import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkit
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
 import de.fh.muenster.locationprivacytoolkit.databinding.FragmentLocationHistoryBinding
 import de.fh.muenster.locationprivacytoolkit.processors.utils.LocationPrivacyDatabase
@@ -53,7 +54,7 @@ class HistoryProcessorFragment : Fragment() {
 
         binding = FragmentLocationHistoryBinding.inflate(inflater, container, false)
         binding.mapView.getMapAsync { map ->
-            map.setStyle(TILE_SERVER)
+            map.setStyle(LocationPrivacyToolkit.mapTilesUrl)
             loadLocations()
         }
 
@@ -240,8 +241,5 @@ class HistoryProcessorFragment : Fragment() {
         private const val LOCATIONS_OPACITY = 0.7f
         private const val LOCATIONS_STROKE_SIZE = 2f
         private const val LOCATIONS_PADDING = 100
-
-        // replace with proper style, if available
-        private const val TILE_SERVER = "https://demotiles.maplibre.org/style.json"
     }
 }
