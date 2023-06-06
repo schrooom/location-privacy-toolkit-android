@@ -22,24 +22,24 @@
             android:id="@+id/layersFab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
             android:layout_marginEnd="16dp"
             android:contentDescription="@string/historyMapLayer"
             android:text="@string/historyMapLayer"
             app:icon="@drawable/ic_layer"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintBottom_toBottomOf="parent" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/timeLineLayerFab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
             android:layout_marginEnd="16dp"
             android:contentDescription="@string/historyMapLayerTimeline"
             app:fabSize="mini"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/layersFab"
+            app:layout_constraintBottom_toTopOf="@id/layersFab"
             app:srcCompat="@drawable/ic_timeline" />
 
         <TextView
@@ -59,13 +59,13 @@
             android:id="@+id/heatmapLayerFab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
             android:layout_marginEnd="16dp"
             android:contentDescription="@string/historyMapLayerHeatmap"
             android:text="@string/historyMapLayerHeatmap"
             app:fabSize="mini"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/timeLineLayerFab"
+            app:layout_constraintBottom_toTopOf="@id/timeLineLayerFab"
             app:srcCompat="@drawable/ic_thermostat" />
 
         <TextView
