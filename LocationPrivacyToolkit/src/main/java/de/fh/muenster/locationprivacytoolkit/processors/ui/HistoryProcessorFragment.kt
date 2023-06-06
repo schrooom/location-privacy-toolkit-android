@@ -1,6 +1,7 @@
 package de.fh.muenster.locationprivacytoolkit.processors.ui
 
 import android.graphics.Color
+import android.graphics.Typeface
 import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -28,7 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 private enum class HistoryMapMode {
-    Points,
+    Timeline,
     Heatmap
 }
 
@@ -39,7 +40,7 @@ class HistoryProcessorFragment : Fragment() {
     private val locationDatabase = LocationPrivacyDatabase.sharedInstance
     private var lastLocations: List<Location>? = null
     private var isLayersFabExtended = false
-    private var mapMode = HistoryMapMode.Points
+    private var mapMode = HistoryMapMode.Timeline
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -56,6 +57,7 @@ class HistoryProcessorFragment : Fragment() {
             loadLocations()
         }
 
+        updateLayerFabState()
         binding.timeLineLayerFab.visibility = View.GONE
         binding.timeLineLayerFabText.visibility = View.GONE
         binding.heatmapLayerFab.visibility = View.GONE
@@ -81,22 +83,42 @@ class HistoryProcessorFragment : Fragment() {
         }
 
         binding.timeLineLayerFab.setOnClickListener {
-            val locations = lastLocations ?: return@setOnClickListener
-            if (mapMode != HistoryMapMode.Points) {
-                mapMode = HistoryMapMode.Points
-                addLocationsToMap(locations)
-            }
+            changeMapMode(HistoryMapMode.Timeline)
+        }
+        binding.timeLineLayerFabText.setOnClickListener {
+            changeMapMode(HistoryMapMode.Timeline)
         }
 
         binding.heatmapLayerFab.setOnClickListener {
-            val locations = lastLocations ?: return@setOnClickListener
-            if (mapMode != HistoryMapMode.Heatmap) {
-                mapMode = HistoryMapMode.Heatmap
-                addLocationsToMap(locations)
-            }
+            changeMapMode(HistoryMapMode.Heatmap)
+        }
+        binding.heatmapLayerFabText.setOnClickListener {
+            changeMapMode(HistoryMapMode.Heatmap)
         }
 
         return binding.root
+    }
+
+    private fun changeMapMode(newMode: HistoryMapMode) {
+        val locations = lastLocations ?: return
+        if (newMode != mapMode) {
+            mapMode = newMode
+            addLocationsToMap(locations)
+            updateLayerFabState()
+        }
+    }
+
+    private fun updateLayerFabState() {
+        when (mapMode) {
+            HistoryMapMode.Timeline -> {
+                binding.timeLineLayerFabText.typeface = Typeface.DEFAULT_BOLD
+                binding.heatmapLayerFabText.typeface = Typeface.DEFAULT
+            }
+            HistoryMapMode.Heatmap -> {
+                binding.timeLineLayerFabText.typeface = Typeface.DEFAULT
+                binding.heatmapLayerFabText.typeface = Typeface.DEFAULT_BOLD
+            }
+        }
     }
 
     private fun loadLocations() {
@@ -152,7 +174,7 @@ class HistoryProcessorFragment : Fragment() {
 
     private fun createLocationsLayer(): Layer {
         return when (mapMode) {
-            HistoryMapMode.Points -> CircleLayer(LOCATIONS_LAYER, LOCATIONS_SOURCE).withProperties(
+            HistoryMapMode.Timeline -> CircleLayer(LOCATIONS_LAYER, LOCATIONS_SOURCE).withProperties(
                 PropertyFactory.circleColor(LOCATIONS_COLOR),
                 PropertyFactory.circleRadius(LOCATIONS_SIZE),
                 PropertyFactory.circleOpacity(LOCATIONS_OPACITY),

@@ -48,6 +48,9 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:text="@string/historyMapLayerTimeline"
+            android:paddingVertical="8dp"
+            android:paddingHorizontal="16dp"
+            android:background="@drawable/rounded_corners"
             app:layout_constraintBottom_toBottomOf="@+id/timeLineLayerFab"
             app:layout_constraintEnd_toStartOf="@+id/timeLineLayerFab"
             app:layout_constraintTop_toTopOf="@+id/timeLineLayerFab" />
@@ -71,6 +74,9 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:text="@string/historyMapLayerHeatmap"
+            android:paddingVertical="8dp"
+            android:paddingHorizontal="16dp"
+            android:background="@drawable/rounded_corners"
             app:layout_constraintBottom_toBottomOf="@+id/heatmapLayerFab"
             app:layout_constraintEnd_toStartOf="@+id/heatmapLayerFab"
             app:layout_constraintTop_toTopOf="@+id/heatmapLayerFab" />
