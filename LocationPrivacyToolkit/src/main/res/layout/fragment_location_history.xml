@@ -18,39 +18,141 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:layout_margin="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/filterToggleGroup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:singleSelection="true"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <Button
+                        android:id="@+id/filterByTimeButton"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="Time" />
+
+                    <Button
+                        android:id="@+id/filterByAreaButton"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="Area" />
+
+                </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/timeFilterLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:animateLayoutChanges="true"
+                    app:layout_constraintTop_toBottomOf="@id/filterToggleGroup"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/deleteButton">
+
+                    <TextView
+                        android:id="@+id/timeFilterDateRange"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/timeFilterDateRangeButton"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/timeFilterDateRangeButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:icon="@drawable/ic_date_range"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/timeFilterDateRange"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/areaFilterLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:animateLayoutChanges="true"
+                    app:layout_constraintTop_toBottomOf="@id/filterToggleGroup"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/deleteButton">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="TODO: area filter layout"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/deleteButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableStart="@drawable/ic_delete"
+                    android:text="@string/historyDelete"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/removeFab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
             android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
             android:contentDescription="@string/historyDelete"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toTopOf="@id/heatmapLayerFab"
+            app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/ic_delete" />
 
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
             android:id="@+id/layersFab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
             android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
             android:contentDescription="@string/historyMapLayer"
             android:text="@string/historyMapLayer"
             app:icon="@drawable/ic_layer"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/timeLineLayerFab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
             android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
             android:contentDescription="@string/historyMapLayerTimeline"
             app:fabSize="mini"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toTopOf="@id/layersFab"
+            app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/ic_timeline" />
 
         <TextView
@@ -58,10 +160,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:text="@string/historyMapLayerTimeline"
-            android:paddingVertical="8dp"
-            android:paddingHorizontal="16dp"
             android:background="@drawable/rounded_corners"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:text="@string/historyMapLayerTimeline"
             app:layout_constraintBottom_toBottomOf="@+id/timeLineLayerFab"
             app:layout_constraintEnd_toStartOf="@+id/timeLineLayerFab"
             app:layout_constraintTop_toTopOf="@+id/timeLineLayerFab" />
@@ -70,13 +172,13 @@
             android:id="@+id/heatmapLayerFab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
             android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
             android:contentDescription="@string/historyMapLayerHeatmap"
             android:text="@string/historyMapLayerHeatmap"
             app:fabSize="mini"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toTopOf="@id/timeLineLayerFab"
+            app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/ic_thermostat" />
 
         <TextView
@@ -84,10 +186,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:text="@string/historyMapLayerHeatmap"
-            android:paddingVertical="8dp"
-            android:paddingHorizontal="16dp"
             android:background="@drawable/rounded_corners"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:text="@string/historyMapLayerHeatmap"
             app:layout_constraintBottom_toBottomOf="@+id/heatmapLayerFab"
             app:layout_constraintEnd_toStartOf="@+id/heatmapLayerFab"
             app:layout_constraintTop_toTopOf="@+id/heatmapLayerFab" />

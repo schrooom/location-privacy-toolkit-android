@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.mapbox.geojson.MultiPoint
@@ -106,6 +107,29 @@ class HistoryProcessorFragment : Fragment() {
             removePersistedLocations()
         }
 
+        binding.filterToggleGroup.addOnButtonCheckedListener { group, checkedId, isChecked ->
+            when (checkedId) {
+                binding.filterByTimeButton.id -> {
+                    binding.areaFilterLayout.visibility = if (isChecked) View.GONE else View.VISIBLE
+                    binding.timeFilterLayout.visibility = if (isChecked) View.VISIBLE else View.GONE
+                }
+                binding.filterByAreaButton.id -> {
+                    binding.timeFilterLayout.visibility = if (isChecked) View.GONE else View.VISIBLE
+                    binding.areaFilterLayout.visibility = if (isChecked) View.VISIBLE else View.GONE
+                }
+                else -> return@addOnButtonCheckedListener
+            }
+        }
+        binding.filterToggleGroup.check(binding.filterByTimeButton.id)
+
+        binding.timeFilterDateRangeButton.setOnClickListener {
+            val dateRangePicker =
+                MaterialDatePicker.Builder.dateRangePicker()
+                    .setTitleText("Select dates")
+                    .build()
+            dateRangePicker.show(parentFragmentManager, null)
+        }
+
         return binding.root
     }
 
@@ -124,6 +148,7 @@ class HistoryProcessorFragment : Fragment() {
                 binding.timeLineLayerFabText.typeface = Typeface.DEFAULT_BOLD
                 binding.heatmapLayerFabText.typeface = Typeface.DEFAULT
             }
+
             HistoryMapMode.Heatmap -> {
                 binding.timeLineLayerFabText.typeface = Typeface.DEFAULT
                 binding.heatmapLayerFabText.typeface = Typeface.DEFAULT_BOLD
@@ -199,7 +224,10 @@ class HistoryProcessorFragment : Fragment() {
 
     private fun createLocationsLayer(): Layer {
         return when (mapMode) {
-            HistoryMapMode.Timeline -> CircleLayer(LOCATIONS_LAYER, LOCATIONS_SOURCE).withProperties(
+            HistoryMapMode.Timeline -> CircleLayer(
+                LOCATIONS_LAYER,
+                LOCATIONS_SOURCE
+            ).withProperties(
                 PropertyFactory.circleColor(LOCATIONS_COLOR),
                 PropertyFactory.circleRadius(LOCATIONS_SIZE),
                 PropertyFactory.circleOpacity(LOCATIONS_OPACITY),
