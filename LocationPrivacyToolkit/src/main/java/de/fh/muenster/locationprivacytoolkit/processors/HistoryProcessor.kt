@@ -5,6 +5,9 @@ import android.location.Location
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkitListener
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 import de.fh.muenster.locationprivacytoolkit.processors.utils.LocationPrivacyDatabase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class HistoryProcessor(context: Context, listener: LocationPrivacyToolkitListener?) :
     AbstractLocationProcessor(context, listener) {
@@ -12,10 +15,12 @@ class HistoryProcessor(context: Context, listener: LocationPrivacyToolkitListene
     override val configKey = LocationPrivacyConfig.History
     override val sort = LocationProcessorSort.Low
 
-    private val locationDatabase = LocationPrivacyDatabase(context)
+    private val locationDatabase = LocationPrivacyDatabase.sharedInstance(context)
 
     override fun manipulateLocation(location: Location, config: Int): Location {
-        locationDatabase.add(location)
+        CoroutineScope(Dispatchers.IO).launch {
+            locationDatabase.add(location)
+        }
         return location
     }
 }

@@ -42,7 +42,7 @@ private enum class HistoryMapMode {
 class HistoryProcessorFragment : Fragment() {
 
     private lateinit var binding: FragmentLocationHistoryBinding
-    private lateinit var locationDatabase: LocationPrivacyDatabase
+    private var locationDatabase: LocationPrivacyDatabase? = null
     private var locationPrivacyConfig: LocationPrivacyConfigManager? = null
     private var lastLocations: List<Location>? = null
     private var isLayersFabExtended = false
@@ -55,9 +55,9 @@ class HistoryProcessorFragment : Fragment() {
         context?.let {
             Mapbox.getInstance(it)
             locationPrivacyConfig = LocationPrivacyConfigManager(it)
+            locationDatabase = LocationPrivacyDatabase.sharedInstance(it)
         }
 
-        locationDatabase = LocationPrivacyDatabase(context)
         binding = FragmentLocationHistoryBinding.inflate(inflater, container, false)
         binding.mapView.getMapAsync { map ->
             map.setStyle(LocationPrivacyToolkit.mapTilesUrl)

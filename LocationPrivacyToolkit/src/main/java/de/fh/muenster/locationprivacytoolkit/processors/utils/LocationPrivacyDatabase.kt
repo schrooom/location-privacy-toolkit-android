@@ -2,84 +2,51 @@ package de.fh.muenster.locationprivacytoolkit.processors.utils
 
 import android.content.Context
 import android.location.Location
-import androidx.core.content.edit
-import com.google.gson.Gson
-import com.google.gson.JsonSyntaxException
-import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
 
-class LocationPrivacyDatabase(context: Context?) {
+@Database(entities = [RoomLocation::class], version = 1)
+abstract class LocationDatabase : RoomDatabase() {
+    abstract fun locationDao(): LocationDAO
+}
 
-    // TODO: placeholder storage, replace with real database
-    private val preferences = context?.getSharedPreferences(
-        LOCATION_STORAGE_PREFERENCES, Context.MODE_PRIVATE
-    )
+class LocationPrivacyDatabase private constructor(context: Context) {
+
+    private val database = Room.databaseBuilder(
+        context,
+        LocationDatabase::class.java, LOCATION_DATABASE_NAME
+    ).build()
 
     fun loadLocations(): List<Location> {
-        val json = preferences?.getString(LOCATIONS_KEY, null)
-        val locationListToken = object : TypeToken<List<Location>>() {}.type
-        return try {
-            val l = Gson().fromJson<List<Location>>(json, locationListToken) ?: emptyList()
-            print("DEBUG: got $json")
-            l
-        } catch (_: JsonSyntaxException) {
-            emptyList()
-        }
+        return database.locationDao().getAll().map { rl -> rl.location }
     }
 
-    fun add(location: Location): Boolean {
-        val persistedLocations = loadLocations().toMutableList()
-        val success = persistedLocations.add(location)
-        if (success) {
-            persistLocations(persistedLocations)
-        }
-        return success
+    fun add(location: Location) {
+        database.locationDao().insert(RoomLocation(location))
     }
 
-    fun add(locations: List<Location>): Boolean {
-        val persistedLocations = loadLocations().toMutableList()
-        val success = persistedLocations.addAll(locations)
-        if (success) {
-            persistLocations(persistedLocations)
-        }
-        return success
+    fun add(locations: List<Location>) {
+        database.locationDao().insertAll(*locations.map { l -> RoomLocation(l) }.toTypedArray())
     }
 
-    fun remove(location: Location): Boolean {
-        val persistedLocations = loadLocations().toMutableList()
-        val success = persistedLocations.remove(location)
-        if (success) {
-            persistLocations(persistedLocations)
-        }
-        return success
+    fun remove(location: Location) {
+        database.locationDao().delete(RoomLocation(location))
     }
 
-    fun remove(locations: List<Location>): Boolean {
-        val persistedLocations = loadLocations().toMutableList()
-        val success = persistedLocations.removeAll(locations)
-        if (success) {
-            persistLocations(persistedLocations)
-        }
-        return success
+    fun remove(locations: List<Location>) {
+        database.locationDao().deleteAll(*locations.map { l -> RoomLocation(l) }.toTypedArray())
     }
 
     fun removeAll() {
-        preferences?.edit { remove(LOCATIONS_KEY) }
-    }
-
-    private fun persistLocations(locations: List<Location>) {
-        CoroutineScope(Dispatchers.IO).launch {
-            val json = Gson().toJson(locations)
-            preferences?.edit {
-                putString(LOCATIONS_KEY, json)
-            }
-        }
+        // TODO: remove all
     }
 
     companion object {
-        const val LOCATION_STORAGE_PREFERENCES = "location-storage-preferences"
-        const val LOCATIONS_KEY = "location-storage-locations"
+        const val LOCATION_DATABASE_NAME = "location-storage"
+        private var instance: LocationPrivacyDatabase? = null
+        fun sharedInstance(context: Context): LocationPrivacyDatabase {
+            return instance ?: LocationPrivacyDatabase(context).also { instance = it }
+        }
     }
 }
