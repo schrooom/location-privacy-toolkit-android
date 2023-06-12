@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
-import com.google.gson.Gson
 import com.mapbox.geojson.MultiPoint
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
@@ -25,7 +24,6 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkit
 import de.fh.muenster.locationprivacytoolkit.R
-import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
 import de.fh.muenster.locationprivacytoolkit.databinding.FragmentLocationHistoryBinding
 import de.fh.muenster.locationprivacytoolkit.processors.utils.LocationPrivacyDatabase
@@ -33,10 +31,18 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.util.Date
 
 private enum class HistoryMapMode {
     Timeline,
     Heatmap
+}
+
+private enum class HistoryMapFilterMode {
+    Area,
+    Time
 }
 
 class HistoryProcessorFragment : Fragment() {
@@ -47,6 +53,31 @@ class HistoryProcessorFragment : Fragment() {
     private var lastLocations: List<Location>? = null
     private var isLayersFabExtended = false
     private var mapMode: HistoryMapMode = HistoryMapMode.Timeline
+
+    // filter
+    private val dateFormat = SimpleDateFormat.getDateInstance(DateFormat.SHORT)
+    private var mapFilterMode: HistoryMapFilterMode = HistoryMapFilterMode.Time
+        set(value) {
+            field = value
+            when (value) {
+                HistoryMapFilterMode.Time -> {
+                    if (timeFilterRange == null) {
+                        val startTime = lastLocations?.minBy { l -> l.time }?.time ?: 0
+                        val endTime = lastLocations?.maxBy { l -> l.time }?.time ?: startTime
+                        timeFilterRange = LongRange(startTime, endTime)
+                        updateTimeFilterLabel()
+                    }
+                    loadLocations()
+                }
+
+                HistoryMapFilterMode.Area -> {
+                    // TODO: add bounds
+                    loadLocations()
+                }
+            }
+        }
+    private var timeFilterRange: LongRange? = null
+    private var areaFilterBounds: LatLngBounds? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -103,30 +134,52 @@ class HistoryProcessorFragment : Fragment() {
             changeMapMode(HistoryMapMode.Heatmap)
         }
 
-        binding.removeFab.setOnClickListener {
-            removePersistedLocations()
+        binding.filterFab.setOnClickListener {
+            val newVisibility =
+                if (binding.filterCard.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+            binding.filterCard.visibility = newVisibility
         }
 
         binding.filterToggleGroup.addOnButtonCheckedListener { group, checkedId, isChecked ->
             when (checkedId) {
                 binding.filterByTimeButton.id -> {
-                    binding.areaFilterLayout.visibility = if (isChecked) View.GONE else View.VISIBLE
-                    binding.timeFilterLayout.visibility = if (isChecked) View.VISIBLE else View.GONE
+                    if (isChecked) {
+                        binding.timeFilterLayout.visibility = View.VISIBLE
+                        mapFilterMode = HistoryMapFilterMode.Time
+                    } else {
+                        binding.timeFilterLayout.visibility = View.GONE
+                    }
                 }
+
                 binding.filterByAreaButton.id -> {
-                    binding.timeFilterLayout.visibility = if (isChecked) View.GONE else View.VISIBLE
-                    binding.areaFilterLayout.visibility = if (isChecked) View.VISIBLE else View.GONE
+                    if (isChecked) {
+                        binding.areaFilterLayout.visibility = View.VISIBLE
+                        mapFilterMode = HistoryMapFilterMode.Area
+                    } else {
+                        binding.areaFilterLayout.visibility = View.GONE
+                    }
                 }
+
                 else -> return@addOnButtonCheckedListener
             }
         }
         binding.filterToggleGroup.check(binding.filterByTimeButton.id)
+
+        binding.filterCardDeleteButton.setOnClickListener {
+            // TODO: apply filters
+            removePersistedLocations()
+        }
 
         binding.timeFilterDateRangeButton.setOnClickListener {
             val dateRangePicker =
                 MaterialDatePicker.Builder.dateRangePicker()
                     .setTitleText("Select dates")
                     .build()
+            dateRangePicker.addOnPositiveButtonClickListener { range ->
+                timeFilterRange = LongRange(range.first, range.second)
+                updateTimeFilterLabel()
+                loadLocations()
+            }
             dateRangePicker.show(parentFragmentManager, null)
         }
 
@@ -156,9 +209,19 @@ class HistoryProcessorFragment : Fragment() {
         }
     }
 
+    private fun updateTimeFilterLabel() {
+        timeFilterRange?.let { range ->
+            val startDate = Date(range.first)
+            val endDate = Date(range.last)
+            binding.timeFilterDateRangeStart.text = dateFormat.format(startDate)
+            binding.timeFilterDateRangeEnd.text = dateFormat.format(endDate)
+        }
+    }
+
     private fun loadLocations() {
         CoroutineScope(Dispatchers.IO).launch {
-            lastLocations = locationDatabase.loadLocations()
+            val locations = locationDatabase?.loadLocations() ?: emptyList()
+            lastLocations = filterLocations(locations)
             withContext(Dispatchers.Main) {
                 lastLocations?.let { locations ->
                     if (locations.isNotEmpty()) {
@@ -181,18 +244,34 @@ class HistoryProcessorFragment : Fragment() {
     }
 
     private fun removePersistedLocations() {
-        val oldLocations = locationDatabase.loadLocations()
-        locationDatabase.removeAll()
+        val oldLocations = locationDatabase?.loadLocations() ?: emptyList()
+        locationDatabase?.removeAll()
         val snackbar =
             Snackbar.make(binding.root, R.string.historyDeletedMessage, Snackbar.LENGTH_LONG)
         snackbar.setAction(
             R.string.exclusionZonesDeleteUndo
         ) {
             CoroutineScope(Dispatchers.IO).launch {
-                locationDatabase.add(oldLocations)
+                locationDatabase?.add(oldLocations)
             }
         }
         snackbar.show()
+    }
+
+    private fun filterLocations(locations: List<Location>): List<Location> {
+        return when (mapFilterMode) {
+            HistoryMapFilterMode.Time -> {
+                timeFilterRange?.let { range ->
+                    locations.filter { l -> l.time >= range.first && l.time <= range.last }
+                } ?: locations
+            }
+
+            HistoryMapFilterMode.Area -> {
+                areaFilterBounds?.let { bounds ->
+                    locations.filter { l -> bounds.contains(LatLng(l.latitude, l.longitude)) }
+                } ?: locations
+            }
+        }
     }
 
     private fun addLocationsToMap(locations: List<Location>) {
