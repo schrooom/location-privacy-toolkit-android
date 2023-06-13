@@ -41,5 +41,8 @@
     <string name="historyDelete">Delete Locations</string>
     <string name="historyFilter">Filter Locations</string>
     <string name="historyFilterByTime">Time</string>
+    <string name="historyFilterByTimeRange">Select date range</string>
     <string name="historyFilterByArea">Area</string>
+    <string name="historyFilterCardClose">Close Filter</string>
+    <string name="historyFilterReset">Reset</string>
 </resources>

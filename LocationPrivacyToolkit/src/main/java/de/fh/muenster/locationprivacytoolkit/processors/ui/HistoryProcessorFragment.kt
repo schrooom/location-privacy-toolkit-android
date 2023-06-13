@@ -1,27 +1,38 @@
 package de.fh.muenster.locationprivacytoolkit.processors.ui
 
+import android.annotation.SuppressLint
 import android.graphics.Color
+import android.graphics.PointF
 import android.graphics.Typeface
 import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
+import android.view.View.OnTouchListener
 import android.view.ViewGroup
+import androidx.core.util.Pair
 import androidx.fragment.app.Fragment
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
+import com.mapbox.geojson.LineString
 import com.mapbox.geojson.MultiPoint
 import com.mapbox.geojson.Point
+import com.mapbox.geojson.Polygon
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.style.layers.CircleLayer
+import com.mapbox.mapboxsdk.style.layers.FillLayer
 import com.mapbox.mapboxsdk.style.layers.HeatmapLayer
 import com.mapbox.mapboxsdk.style.layers.Layer
+import com.mapbox.mapboxsdk.style.layers.LineLayer
 import com.mapbox.mapboxsdk.style.layers.Property
+import com.mapbox.mapboxsdk.style.layers.Property.LINE_JOIN_ROUND
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+import com.mapbox.turf.TurfJoins
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkit
 import de.fh.muenster.locationprivacytoolkit.R
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
@@ -35,14 +46,17 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 
-private enum class HistoryMapMode {
-    Timeline,
-    Heatmap
+
+private enum class HistoryMapContentMode {
+    Timeline, Heatmap
 }
 
 private enum class HistoryMapFilterMode {
-    Area,
-    Time
+    Area, Time
+}
+
+private enum class HistoryMapTouchMode {
+    Move, Draw
 }
 
 class HistoryProcessorFragment : Fragment() {
@@ -52,22 +66,36 @@ class HistoryProcessorFragment : Fragment() {
     private var locationPrivacyConfig: LocationPrivacyConfigManager? = null
     private var lastLocations: List<Location>? = null
     private var isLayersFabExtended = false
-    private var mapMode: HistoryMapMode = HistoryMapMode.Timeline
 
-    // filter
-    private val dateFormat = SimpleDateFormat.getDateInstance(DateFormat.SHORT)
+    // map modes
+    private var mapContentMode: HistoryMapContentMode = HistoryMapContentMode.Timeline
+    private var mapTouchMode: HistoryMapTouchMode = HistoryMapTouchMode.Move
+        @SuppressLint("ClickableViewAccessibility") set(value) {
+            field = value
+            when (value) {
+                HistoryMapTouchMode.Move -> {
+                    binding.mapView.setOnTouchListener(null)
+                    binding.filterCardCreateAreaButton.visibility = View.VISIBLE
+                    binding.filterCardAreaHintText.visibility = View.GONE
+                }
+
+                HistoryMapTouchMode.Draw -> {
+                    binding.mapView.setOnTouchListener(drawTouchListener)
+                    binding.filterCardCreateAreaButton.visibility = View.GONE
+                    binding.filterCardAreaHintText.visibility = View.VISIBLE
+                }
+            }
+        }
     private var mapFilterMode: HistoryMapFilterMode = HistoryMapFilterMode.Time
         set(value) {
             field = value
             when (value) {
                 HistoryMapFilterMode.Time -> {
-                    if (timeFilterRange == null) {
-                        val startTime = lastLocations?.minBy { l -> l.time }?.time ?: 0
-                        val endTime = lastLocations?.maxBy { l -> l.time }?.time ?: startTime
-                        timeFilterRange = LongRange(startTime, endTime)
-                        updateTimeFilterLabel()
-                    }
+                    // reset map touch mode
+                    mapTouchMode = HistoryMapTouchMode.Move
+                    updateAreaFilterOnMap(hide = true)
                     loadLocations()
+                    updateTimeFilterLabel()
                 }
 
                 HistoryMapFilterMode.Area -> {
@@ -76,8 +104,12 @@ class HistoryProcessorFragment : Fragment() {
                 }
             }
         }
+
+    // filter
+    private val dateFormat = SimpleDateFormat.getDateInstance(DateFormat.SHORT)
     private var timeFilterRange: LongRange? = null
-    private var areaFilterBounds: LatLngBounds? = null
+    private val areaFilterPolygon = mutableListOf<Point>()
+    private val areaFilterOutline = mutableListOf<Point>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -91,10 +123,55 @@ class HistoryProcessorFragment : Fragment() {
 
         binding = FragmentLocationHistoryBinding.inflate(inflater, container, false)
         binding.mapView.getMapAsync { map ->
+            map.getStyle {
+                initMapForAreaFilterSelection()
+            }
             map.setStyle(LocationPrivacyToolkit.mapTilesUrl)
             loadLocations()
         }
 
+        initFloatingActionButtons()
+        initFilterOptions()
+
+        return binding.root
+    }
+
+    override fun onStart() {
+        super.onStart()
+        binding.mapView.onStart()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.mapView.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        binding.mapView.onPause()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        binding.mapView.onStop()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        binding.mapView.onSaveInstanceState(outState)
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        binding.mapView.onLowMemory()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        binding.mapView.onDestroy()
+    }
+
+    private fun initFloatingActionButtons() {
         updateLayerFabState()
         binding.timeLineLayerFab.visibility = View.GONE
         binding.timeLineLayerFabText.visibility = View.GONE
@@ -121,26 +198,37 @@ class HistoryProcessorFragment : Fragment() {
         }
 
         binding.timeLineLayerFab.setOnClickListener {
-            changeMapMode(HistoryMapMode.Timeline)
+            changeMapContentMode(HistoryMapContentMode.Timeline)
         }
         binding.timeLineLayerFabText.setOnClickListener {
-            changeMapMode(HistoryMapMode.Timeline)
+            changeMapContentMode(HistoryMapContentMode.Timeline)
         }
 
         binding.heatmapLayerFab.setOnClickListener {
-            changeMapMode(HistoryMapMode.Heatmap)
+            changeMapContentMode(HistoryMapContentMode.Heatmap)
         }
         binding.heatmapLayerFabText.setOnClickListener {
-            changeMapMode(HistoryMapMode.Heatmap)
+            changeMapContentMode(HistoryMapContentMode.Heatmap)
         }
+    }
 
+    private fun initFilterOptions() {
+        binding.filterCardCloseButton.setOnClickListener {
+            binding.filterCard.visibility = View.GONE
+        }
         binding.filterFab.setOnClickListener {
-            val newVisibility =
-                if (binding.filterCard.visibility == View.VISIBLE) View.GONE else View.VISIBLE
-            binding.filterCard.visibility = newVisibility
+            val showFilter = binding.filterCard.visibility == View.GONE
+            binding.filterCard.visibility = if (showFilter) View.VISIBLE else View.GONE
+            if (showFilter && timeFilterRange == null) {
+                // init timeFilterRange
+                val startTime = lastLocations?.minBy { l -> l.time }?.time ?: 0
+                val endTime = lastLocations?.maxBy { l -> l.time }?.time ?: startTime
+                timeFilterRange = LongRange(startTime, endTime)
+                updateTimeFilterLabel()
+            }
         }
 
-        binding.filterToggleGroup.addOnButtonCheckedListener { group, checkedId, isChecked ->
+        binding.filterToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
             when (checkedId) {
                 binding.filterByTimeButton.id -> {
                     if (isChecked) {
@@ -165,16 +253,27 @@ class HistoryProcessorFragment : Fragment() {
         }
         binding.filterToggleGroup.check(binding.filterByTimeButton.id)
 
+        binding.filterCardResetButton.setOnClickListener {
+            areaFilterOutline.clear()
+            areaFilterPolygon.clear()
+            updateAreaFilterOnMap()
+        }
         binding.filterCardDeleteButton.setOnClickListener {
             // TODO: apply filters
             removePersistedLocations()
         }
 
+        binding.filterCardCreateAreaButton.setOnClickListener {
+            mapTouchMode = HistoryMapTouchMode.Draw
+        }
+
         binding.timeFilterDateRangeButton.setOnClickListener {
-            val dateRangePicker =
-                MaterialDatePicker.Builder.dateRangePicker()
-                    .setTitleText("Select dates")
-                    .build()
+            val dateRangePicker = MaterialDatePicker.Builder.dateRangePicker().apply {
+                setTitleText(R.string.historyFilterByTimeRange)
+                timeFilterRange?.let { range ->
+                    setSelection(Pair(range.first, range.last))
+                }
+            }.build()
             dateRangePicker.addOnPositiveButtonClickListener { range ->
                 timeFilterRange = LongRange(range.first, range.second)
                 updateTimeFilterLabel()
@@ -182,27 +281,54 @@ class HistoryProcessorFragment : Fragment() {
             }
             dateRangePicker.show(parentFragmentManager, null)
         }
-
-        return binding.root
     }
 
-    private fun changeMapMode(newMode: HistoryMapMode) {
+    private fun initMapForAreaFilterSelection() {
+        binding.mapView.getMapAsync { map ->
+            map.style?.let { style ->
+                style.addSource(GeoJsonSource(AREA_FILTER_LINE_SOURCE))
+                style.addSource(GeoJsonSource(AREA_FILTER_FILL_SOURCE))
+
+                style.addLayer(
+                    LineLayer(
+                        AREA_FILTER_LINE_LAYER, AREA_FILTER_LINE_SOURCE
+                    ).withProperties(
+                        PropertyFactory.lineWidth(AREA_FILTER_LINE_WIDTH),
+                        PropertyFactory.lineJoin(LINE_JOIN_ROUND),
+                        PropertyFactory.lineOpacity(AREA_FILTER_LINE_OPACITY),
+                        PropertyFactory.lineColor(Color.parseColor(AREA_FILTER_LINE_COLOR))
+                    )
+                )
+                style.addLayerBelow(
+                    FillLayer(
+                        AREA_FILTER_FILL_LAYER, AREA_FILTER_FILL_SOURCE
+                    ).withProperties(
+                        PropertyFactory.fillColor(Color.RED),
+                        PropertyFactory.fillOpacity(AREA_FILTER_FILL_OPACITY)
+                    ), AREA_FILTER_LINE_LAYER
+                )
+
+            }
+        }
+    }
+
+    private fun changeMapContentMode(newMode: HistoryMapContentMode) {
         val locations = lastLocations ?: return
-        if (newMode != mapMode) {
-            mapMode = newMode
+        if (newMode != mapContentMode) {
+            mapContentMode = newMode
             addLocationsToMap(locations)
             updateLayerFabState()
         }
     }
 
     private fun updateLayerFabState() {
-        when (mapMode) {
-            HistoryMapMode.Timeline -> {
+        when (mapContentMode) {
+            HistoryMapContentMode.Timeline -> {
                 binding.timeLineLayerFabText.typeface = Typeface.DEFAULT_BOLD
                 binding.heatmapLayerFabText.typeface = Typeface.DEFAULT
             }
 
-            HistoryMapMode.Heatmap -> {
+            HistoryMapContentMode.Heatmap -> {
                 binding.timeLineLayerFabText.typeface = Typeface.DEFAULT
                 binding.heatmapLayerFabText.typeface = Typeface.DEFAULT_BOLD
             }
@@ -244,18 +370,22 @@ class HistoryProcessorFragment : Fragment() {
     }
 
     private fun removePersistedLocations() {
-        val oldLocations = locationDatabase?.loadLocations() ?: emptyList()
-        locationDatabase?.removeAll()
-        val snackbar =
-            Snackbar.make(binding.root, R.string.historyDeletedMessage, Snackbar.LENGTH_LONG)
-        snackbar.setAction(
-            R.string.exclusionZonesDeleteUndo
-        ) {
-            CoroutineScope(Dispatchers.IO).launch {
-                locationDatabase?.add(oldLocations)
+        CoroutineScope(Dispatchers.IO).launch {
+            val oldLocations = locationDatabase?.loadLocations() ?: emptyList()
+            locationDatabase?.removeAll()
+            val snackbar =
+                Snackbar.make(binding.root, R.string.historyDeletedMessage, Snackbar.LENGTH_LONG)
+            snackbar.setAction(
+                R.string.exclusionZonesDeleteUndo
+            ) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    locationDatabase?.add(oldLocations)
+                }
+            }
+            withContext(Dispatchers.Main) {
+                snackbar.show()
             }
         }
-        snackbar.show()
     }
 
     private fun filterLocations(locations: List<Location>): List<Location> {
@@ -267,9 +397,10 @@ class HistoryProcessorFragment : Fragment() {
             }
 
             HistoryMapFilterMode.Area -> {
-                areaFilterBounds?.let { bounds ->
-                    locations.filter { l -> bounds.contains(LatLng(l.latitude, l.longitude)) }
-                } ?: locations
+                val polygon: Polygon = Polygon.fromLngLats(listOf(areaFilterPolygon))
+                locations.filter { l ->
+                    TurfJoins.inside(Point.fromLngLat(l.longitude, l.latitude), polygon)
+                }
             }
         }
     }
@@ -302,10 +433,9 @@ class HistoryProcessorFragment : Fragment() {
     }
 
     private fun createLocationsLayer(): Layer {
-        return when (mapMode) {
-            HistoryMapMode.Timeline -> CircleLayer(
-                LOCATIONS_LAYER,
-                LOCATIONS_SOURCE
+        return when (mapContentMode) {
+            HistoryMapContentMode.Timeline -> CircleLayer(
+                LOCATIONS_LAYER, LOCATIONS_SOURCE
             ).withProperties(
                 PropertyFactory.circleColor(LOCATIONS_COLOR),
                 PropertyFactory.circleRadius(LOCATIONS_SIZE),
@@ -315,46 +445,68 @@ class HistoryProcessorFragment : Fragment() {
                 PropertyFactory.circleStrokeWidth(LOCATIONS_STROKE_SIZE)
             )
 
-            HistoryMapMode.Heatmap -> HeatmapLayer(
-                LOCATIONS_LAYER,
-                LOCATIONS_SOURCE
+            HistoryMapContentMode.Heatmap -> HeatmapLayer(
+                LOCATIONS_LAYER, LOCATIONS_SOURCE
             )
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        binding.mapView.onStart()
+    @SuppressLint("ClickableViewAccessibility")
+    private val drawTouchListener = OnTouchListener { _, motionEvent ->
+        binding.mapView.getMapAsync { map ->
+            val latLngTouchCoordinate: LatLng = map.projection.fromScreenLocation(
+                PointF(motionEvent.x, motionEvent.y)
+            )
+            val screenTouchPoint = Point.fromLngLat(
+                latLngTouchCoordinate.longitude, latLngTouchCoordinate.latitude
+            )
+
+            // update polygon and outline
+            areaFilterOutline.add(screenTouchPoint)
+            if (areaFilterPolygon.size < 2) {
+                areaFilterPolygon.add(screenTouchPoint)
+            } else {
+                if (areaFilterPolygon.size > 2) {
+                    areaFilterPolygon.removeAt(
+                        areaFilterPolygon.size - 1
+                    )
+                }
+                areaFilterPolygon.add(screenTouchPoint)
+                areaFilterPolygon.add(
+                    areaFilterPolygon[0]
+                )
+            }
+            // draw polygon and outline
+            updateAreaFilterOnMap()
+
+            if (motionEvent.action == MotionEvent.ACTION_UP) {
+                // add the first screen touch point to the end of the outline
+                areaFilterOutline.add(
+                    areaFilterOutline[0]
+                )
+
+                // drawing is done, reset to move mode
+                mapTouchMode = HistoryMapTouchMode.Move
+            }
+        }
+        true
     }
 
-    override fun onResume() {
-        super.onResume()
-        binding.mapView.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        binding.mapView.onPause()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        binding.mapView.onStop()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        binding.mapView.onSaveInstanceState(outState)
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        binding.mapView.onLowMemory()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        binding.mapView.onDestroy()
+    private fun updateAreaFilterOnMap(hide: Boolean = false) {
+        val polyline = LineString.fromLngLats(
+            areaFilterOutline
+        )
+        val polygon: Polygon = Polygon.fromLngLats(listOf(areaFilterPolygon))
+        binding.mapView.getMapAsync { map ->
+            map.style?.let { style ->
+                style.getSourceAs<GeoJsonSource>(AREA_FILTER_LINE_SOURCE)?.setGeoJson(
+                    if (hide) null else polyline
+                )
+                style.getSourceAs<GeoJsonSource>(AREA_FILTER_FILL_SOURCE)?.setGeoJson(
+                    if (hide) null else polygon
+                )
+            }
+        }
     }
 
     companion object {
@@ -364,6 +516,7 @@ class HistoryProcessorFragment : Fragment() {
         private const val INITIAL_LONGITUDE = 7.628202
         private const val INITIAL_ZOOM = 3.0
 
+        // general locations
         private const val LOCATIONS_LAYER = "exclusion_zone_layer"
         private const val LOCATIONS_SOURCE = "exclusion_zone_source"
         private const val LOCATIONS_COLOR = Color.BLUE
@@ -372,5 +525,15 @@ class HistoryProcessorFragment : Fragment() {
         private const val LOCATIONS_OPACITY = 0.7f
         private const val LOCATIONS_STROKE_SIZE = 2f
         private const val LOCATIONS_PADDING = 100
+
+        // area filter selection
+        private const val AREA_FILTER_LINE_SOURCE = "area_filter_line_source"
+        private const val AREA_FILTER_FILL_SOURCE = "area_filter_fill_source"
+        private const val AREA_FILTER_LINE_LAYER = "area_filter_line_layer"
+        private const val AREA_FILTER_FILL_LAYER = "area_filter_fill_layer"
+        private const val AREA_FILTER_LINE_COLOR = "#a0861c"
+        private const val AREA_FILTER_LINE_WIDTH = 5f
+        private const val AREA_FILTER_LINE_OPACITY = 1f
+        private const val AREA_FILTER_FILL_OPACITY = .4f
     }
 }

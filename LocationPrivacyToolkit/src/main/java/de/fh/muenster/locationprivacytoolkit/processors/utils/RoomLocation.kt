@@ -28,6 +28,7 @@ data class RoomLocation(
     val location: Location
         get() {
             return Location("").also {
+                it.time = time
                 it.latitude = latitude
                 it.longitude = longitude
                 it.altitude = altitude
