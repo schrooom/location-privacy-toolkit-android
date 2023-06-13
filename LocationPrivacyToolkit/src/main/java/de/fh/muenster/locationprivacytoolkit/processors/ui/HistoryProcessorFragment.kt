@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import androidx.core.util.Pair
 import androidx.fragment.app.Fragment
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.MultiPoint
@@ -214,22 +215,10 @@ class HistoryProcessorFragment : Fragment() {
 
     private fun initFilterOptions() {
         binding.filterCardCloseButton.setOnClickListener {
-            binding.filterCard.visibility = View.GONE
-            updateMapPadding()
-            updateAreaFilterOnMap(hide = true)
+            toggleFilterCard()
         }
         binding.filterFab.setOnClickListener {
-            val showFilter = binding.filterCard.visibility == View.GONE
-            binding.filterCard.visibility = if (showFilter) View.VISIBLE else View.GONE
-            if (showFilter && timeFilterRange == null) {
-                // init timeFilterRange
-                val startTime = lastLocations?.minBy { l -> l.time }?.time ?: 0
-                val endTime = lastLocations?.maxBy { l -> l.time }?.time ?: startTime
-                timeFilterRange = LongRange(startTime, endTime)
-                updateTimeFilterLabel()
-            }
-            updateMapPadding()
-            updateAreaFilterOnMap(hide = !showFilter)
+            toggleFilterCard()
         }
 
         binding.filterToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
@@ -263,8 +252,7 @@ class HistoryProcessorFragment : Fragment() {
             updateAreaFilterOnMap()
         }
         binding.filterCardDeleteButton.setOnClickListener {
-            // TODO: apply filters
-            removePersistedLocations()
+            deleteMarkedLocations()
         }
 
         binding.filterCardCreateAreaButton.setOnClickListener {
@@ -367,6 +355,20 @@ class HistoryProcessorFragment : Fragment() {
         }
     }
 
+    private fun toggleFilterCard() {
+        val showFilter = binding.filterCard.visibility == View.GONE
+        binding.filterCard.visibility = if (showFilter) View.VISIBLE else View.GONE
+        if (showFilter && timeFilterRange == null) {
+            // init timeFilterRange
+            val startTime = lastLocations?.minBy { l -> l.time }?.time ?: 0
+            val endTime = lastLocations?.maxBy { l -> l.time }?.time ?: startTime
+            timeFilterRange = LongRange(startTime, endTime)
+            updateTimeFilterLabel()
+        }
+        updateMapPadding()
+        updateAreaFilterOnMap(hide = !showFilter)
+    }
+
     private fun changeMapContentMode(newMode: HistoryMapContentMode) {
         val locations = lastLocations ?: return
         if (newMode != mapContentMode) {
@@ -399,46 +401,74 @@ class HistoryProcessorFragment : Fragment() {
         }
     }
 
-    private fun loadLocations() {
+    private fun loadLocations(updateCamera: Boolean = true) {
         CoroutineScope(Dispatchers.IO).launch {
             lastLocations = locationDatabase?.loadLocations() ?: emptyList()
             withContext(Dispatchers.Main) {
                 lastLocations?.let { locations ->
                     if (locations.isNotEmpty()) {
-                        updateMapLocations(locations)
+                        updateMapLocations(locations, updateCamera)
                         return@withContext
                     }
                 }
-                // fallback: default initial zoom
-                binding.mapView.getMapAsync { map ->
-                    val initialLatLng = LatLng(
-                        INITIAL_LATITUDE, INITIAL_LONGITUDE
-                    )
-                    val camera = CameraUpdateFactory.newLatLngZoom(
-                        initialLatLng, INITIAL_ZOOM
-                    )
-                    map.easeCamera(camera)
+                if (updateCamera) {
+                    // fallback: default initial zoom
+                    binding.mapView.getMapAsync { map ->
+                        val initialLatLng = LatLng(
+                            INITIAL_LATITUDE, INITIAL_LONGITUDE
+                        )
+                        val camera = CameraUpdateFactory.newLatLngZoom(
+                            initialLatLng, INITIAL_ZOOM
+                        )
+                        map.easeCamera(camera)
+                    }
                 }
             }
         }
     }
 
-    private fun removePersistedLocations() {
-        CoroutineScope(Dispatchers.IO).launch {
-            val oldLocations = locationDatabase?.loadLocations() ?: emptyList()
-            locationDatabase?.removeAll()
-            val snackbar =
-                Snackbar.make(binding.root, R.string.historyDeletedMessage, Snackbar.LENGTH_LONG)
-            snackbar.setAction(
-                R.string.exclusionZonesDeleteUndo
-            ) {
-                CoroutineScope(Dispatchers.IO).launch {
-                    locationDatabase?.add(oldLocations)
+    private fun deleteMarkedLocations() {
+        context?.let { c ->
+            val dialog = MaterialAlertDialogBuilder(c).setTitle(R.string.historyDeleteAlertTitle)
+                .setMessage(R.string.historyDeletedMessage)
+                .setNegativeButton(R.string.historyCancelAlertButton, null)
+                .setPositiveButton(R.string.historyDeleteAlertButton) { _, _ ->
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val locations = lastLocations ?: return@launch
+                        val filteredLocations = filterLocations(locations)
+                        locationDatabase?.remove(filteredLocations)
+
+                        // update ui and map
+                        withContext(Dispatchers.Main) {
+                            toggleFilterCard()
+                        }
+                        loadLocations(updateCamera = false)
+                        areaFilterOutline.clear()
+                        areaFilterPolygon.clear()
+                        updateAreaFilterOnMap()
+
+                        // show deletion snack bar
+                        val bar =
+                            Snackbar.make(
+                                binding.root,
+                                R.string.historyDeletedMessage,
+                                Snackbar.LENGTH_LONG
+                            )
+                        bar.setAction(
+                            R.string.historyDeleteUndo
+                        ) {
+                            CoroutineScope(Dispatchers.IO).launch {
+                                locationDatabase?.add(filteredLocations)
+                                loadLocations()
+                            }
+                        }
+                        withContext(Dispatchers.Main) {
+                            bar.show()
+                        }
+                    }
+
                 }
-            }
-            withContext(Dispatchers.Main) {
-                snackbar.show()
-            }
+            dialog.show()
         }
     }
 
@@ -460,7 +490,7 @@ class HistoryProcessorFragment : Fragment() {
         }
     }
 
-    private fun updateMapLocations(locations: List<Location>) {
+    private fun updateMapLocations(locations: List<Location>, updateCamera: Boolean = true) {
         binding.mapView.getMapAsync { map ->
             map.getStyle { style ->
                 // add locations  layer
@@ -486,19 +516,11 @@ class HistoryProcessorFragment : Fragment() {
                             ?.setProperties(PropertyFactory.visibility(Property.VISIBLE))
                     }
                 }
-                val bounds = LatLngBounds.fromLatLngs(locations.map { l -> LatLng(l) })
-                val update = CameraUpdateFactory.newLatLngBounds(bounds, LOCATIONS_PADDING)
-                map.easeCamera(update)
-            }
-        }
-    }
-
-    private fun updateMapFilterMarkedLocations(show: Boolean = true) {
-        val visibility = if (show) Property.VISIBLE else Property.NONE
-        binding.mapView.getMapAsync { map ->
-            map.getStyle { style ->
-                style.getLayer(LOCATIONS_MARKED_LAYER)
-                    ?.setProperties(PropertyFactory.visibility(visibility))
+                if (updateCamera) {
+                    val bounds = LatLngBounds.fromLatLngs(locations.map { l -> LatLng(l) })
+                    val update = CameraUpdateFactory.newLatLngBounds(bounds, LOCATIONS_PADDING)
+                    map.easeCamera(update)
+                }
             }
         }
     }

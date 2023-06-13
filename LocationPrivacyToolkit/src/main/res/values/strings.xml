@@ -39,6 +39,10 @@
     <string name="historyDeletedMessage">Locations deleted</string>
     <string name="historyDeleteUndo">Undo</string>
     <string name="historyDelete">Delete Locations</string>
+    <string name="historyDeleteAlertTitle">Delete locations</string>
+    <string name="historyDeleteAlertMessage">Are you sure to delete the selected locations? This cannot be undone.</string>
+    <string name="historyDeleteAlertButton">Delete</string>
+    <string name="historyCancelAlertButton">Cancel</string>
     <string name="historyFilter">Filter Locations</string>
     <string name="historyFilterByTime">Time</string>
     <string name="historyFilterByTimeRange">Select date range</string>
