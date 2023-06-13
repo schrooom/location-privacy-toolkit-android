@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentManager
@@ -39,8 +40,7 @@ class LocationPrivacyConfigActivity : AppCompatActivity(),
         }
         binding.locationConfigRecyclerView.adapter = configAdapter
         val dividerItemDecoration = DividerItemDecoration(
-            binding.locationConfigRecyclerView.context,
-            RecyclerView.VERTICAL
+            binding.locationConfigRecyclerView.context, RecyclerView.VERTICAL
         )
         binding.locationConfigRecyclerView.addItemDecoration(dividerItemDecoration)
 
@@ -70,6 +70,12 @@ class LocationPrivacyConfigActivity : AppCompatActivity(),
             } else {
                 "no"
             }
+        binding.locationConfigShowMoreButton.setOnClickListener {
+            toggleMoreMenu()
+        }
+        binding.locationConfigHideMoreButton.setOnClickListener {
+            toggleMoreMenu()
+        }
     }
 
     // LocationPrivacyConfigAdapterListener
@@ -90,4 +96,14 @@ class LocationPrivacyConfigActivity : AppCompatActivity(),
         configAdapter.notifyDataSetChanged()
     }
 
+    private fun toggleMoreMenu() {
+        val showMore = binding.locationConfigShowMoreButton.visibility == View.VISIBLE
+        if (showMore) {
+            binding.locationConfigShowMoreButton.visibility = View.GONE
+            binding.locationConfigMoreMenu.visibility = View.VISIBLE
+        } else {
+            binding.locationConfigShowMoreButton.visibility = View.VISIBLE
+            binding.locationConfigMoreMenu.visibility = View.GONE
+        }
+    }
 }

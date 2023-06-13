@@ -3,6 +3,7 @@
     <string name="systemPermissionOpenSettingsTitle">Open System Settings</string>
     <string name="systemPermissionLocationAccessTitle">Location Access</string>
     <string name="systemPermissionBackgroundAccessTitle">Background Access</string>
+    <string name="systemPermissionShowMoreButton">Show more</string>
     <string name="privacyConfigTitle">Privacy Configuration</string>
     <string name="accessTitle">Access</string>
     <string name="accessSubtitle">Share your location info?</string>
@@ -47,6 +48,8 @@
     <string name="historyFilterByTime">Time</string>
     <string name="historyFilterByTimeRange">Select date range</string>
     <string name="historyFilterByArea">Area</string>
+    <string name="historyFilterByAreaHint">Draw an area to select locations</string>
+    <string name="historyFilterCardTitle">Which locations to delete?</string>
     <string name="historyFilterCardClose">Close Filter</string>
     <string name="historyFilterReset">Reset</string>
 </resources>

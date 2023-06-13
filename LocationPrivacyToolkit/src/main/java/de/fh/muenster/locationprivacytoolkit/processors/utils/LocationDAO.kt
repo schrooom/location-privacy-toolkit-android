@@ -7,8 +7,8 @@ import androidx.room.Query
 
 @Dao
 interface LocationDAO {
-    @Query("SELECT * FROM roomLocation")
-    fun getAll(): List<RoomLocation>
+    @Query("SELECT * FROM roomLocation WHERE isExample = :isExample")
+    fun getAll(isExample: Boolean = false): List<RoomLocation>
 
     @Insert
     fun insert(location: RoomLocation)
@@ -21,4 +21,7 @@ interface LocationDAO {
 
     @Delete
     fun deleteAll(vararg locations: RoomLocation)
+
+    @Query("DELETE FROM roomLocation WHERE isExample = true")
+    fun deleteExampleLocations()
 }

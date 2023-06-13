@@ -38,8 +38,12 @@ class LocationPrivacyDatabase private constructor(context: Context) {
         database.locationDao().deleteAll(*locations.map { l -> RoomLocation(l) }.toTypedArray())
     }
 
-    fun removeAll() {
-        // TODO: remove all
+    fun removeExampleLocations() {
+        database.locationDao().deleteExampleLocations()
+    }
+
+    fun insertExampleLocations() {
+        database.locationDao().getAll(isExample = true)
     }
 
     companion object {

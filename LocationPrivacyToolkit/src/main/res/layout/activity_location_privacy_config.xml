@@ -24,6 +24,7 @@
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:animateLayoutChanges="true"
                     android:padding="16dp">
 
                     <TextView
@@ -41,13 +42,26 @@
                         style="?android:attr/buttonBarButtonStyle"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
+                        android:contentDescription="@string/systemPermissionOpenSettingsTitle"
                         android:drawableEnd="@drawable/ic_open"
                         android:padding="0dp"
-                        android:contentDescription="@string/systemPermissionOpenSettingsTitle"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintHorizontal_bias="1.0"
                         app:layout_constraintStart_toEndOf="@id/locationConfigSystemCardTitle"
                         app:layout_constraintTop_toTopOf="parent" />
+
+                    <Button
+                        android:id="@+id/locationConfigShowMoreButton"
+                        style="?android:attr/buttonBarButtonStyle"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:contentDescription="@string/systemPermissionShowMoreButton"
+                        android:drawableEnd="@drawable/ic_arrow_down"
+                        android:padding="0dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="1.0"
+                        app:layout_constraintStart_toEndOf="@id/locationConfigSystemCardTitle" />
 
                     <TextView
                         android:id="@+id/locationConfigSystemAccessTitle"
@@ -103,6 +117,33 @@
                         app:layout_constraintHorizontal_bias="0"
                         app:layout_constraintStart_toEndOf="@id/locationConfigSystemBackgroundTitle" />
 
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/locationConfigMoreMenu"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:visibility="gone"
+                        app:layout_constraintTop_toBottomOf="@id/locationConfigSystemBackgroundTitle">
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent" />
+
+                        <Button
+                            android:id="@+id/locationConfigHideMoreButton"
+                            style="?android:attr/buttonBarButtonStyle"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:contentDescription="@string/systemPermissionShowMoreButton"
+                            android:drawableEnd="@drawable/ic_arrow_up"
+                            android:padding="0dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintHorizontal_bias="1.0" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
 

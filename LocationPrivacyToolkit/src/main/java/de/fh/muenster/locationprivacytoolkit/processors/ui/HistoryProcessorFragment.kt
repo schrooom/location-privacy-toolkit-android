@@ -221,30 +221,30 @@ class HistoryProcessorFragment : Fragment() {
             toggleFilterCard()
         }
 
-        binding.filterToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+        binding.filterCardToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
             when (checkedId) {
-                binding.filterByTimeButton.id -> {
+                binding.filterCardTimeToggleButton.id -> {
                     if (isChecked) {
-                        binding.timeFilterLayout.visibility = View.VISIBLE
+                        binding.filterCardTimeLayout.visibility = View.VISIBLE
                         mapFilterMode = HistoryMapFilterMode.Time
                     } else {
-                        binding.timeFilterLayout.visibility = View.GONE
+                        binding.filterCardTimeLayout.visibility = View.GONE
                     }
                 }
 
-                binding.filterByAreaButton.id -> {
+                binding.filterCardAreaToggleButton.id -> {
                     if (isChecked) {
-                        binding.areaFilterLayout.visibility = View.VISIBLE
+                        binding.filterCardAreaLayout.visibility = View.VISIBLE
                         mapFilterMode = HistoryMapFilterMode.Area
                     } else {
-                        binding.areaFilterLayout.visibility = View.GONE
+                        binding.filterCardAreaLayout.visibility = View.GONE
                     }
                 }
 
                 else -> return@addOnButtonCheckedListener
             }
         }
-        binding.filterToggleGroup.check(binding.filterByTimeButton.id)
+        binding.filterCardToggleGroup.check(binding.filterCardTimeToggleButton.id)
 
         binding.filterCardResetButton.setOnClickListener {
             areaFilterOutline.clear()
@@ -259,7 +259,7 @@ class HistoryProcessorFragment : Fragment() {
             mapTouchMode = HistoryMapTouchMode.Draw
         }
 
-        binding.timeFilterDateRangeButton.setOnClickListener {
+        binding.filterCardTimeDateRangeButton.setOnClickListener {
             val dateRangePicker = MaterialDatePicker.Builder.dateRangePicker().apply {
                 setTitleText(R.string.historyFilterByTimeRange)
                 timeFilterRange?.let { range ->
@@ -358,6 +358,7 @@ class HistoryProcessorFragment : Fragment() {
     private fun toggleFilterCard() {
         val showFilter = binding.filterCard.visibility == View.GONE
         binding.filterCard.visibility = if (showFilter) View.VISIBLE else View.GONE
+        binding.filterFab.visibility = if (showFilter) View.GONE else View.VISIBLE
         if (showFilter && timeFilterRange == null) {
             // init timeFilterRange
             val startTime = lastLocations?.minBy { l -> l.time }?.time ?: 0
@@ -396,8 +397,8 @@ class HistoryProcessorFragment : Fragment() {
         timeFilterRange?.let { range ->
             val startDate = Date(range.first)
             val endDate = Date(range.last)
-            binding.timeFilterDateRangeStart.text = dateFormat.format(startDate)
-            binding.timeFilterDateRangeEnd.text = dateFormat.format(endDate)
+            binding.filterCardTimeDateRangeStart.text = dateFormat.format(startDate)
+            binding.filterCardTimeDateRangeEnd.text = dateFormat.format(endDate)
         }
     }
 

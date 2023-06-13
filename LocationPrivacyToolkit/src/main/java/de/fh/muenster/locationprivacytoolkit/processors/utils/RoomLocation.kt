@@ -14,15 +14,17 @@ data class RoomLocation(
     @ColumnInfo(name = "accuracy") val accuracy: Float,
     @ColumnInfo(name = "speed") val speed: Float,
     @ColumnInfo(name = "bearing") val bearing: Float,
+    @ColumnInfo(name = "isExample") val isExample: Boolean,
 ) {
-    constructor(location: Location) : this(
+    constructor(location: Location, isExample: Boolean = false) : this(
         location.time,
         location.latitude,
         location.longitude,
         location.altitude,
         location.accuracy,
         location.speed,
-        location.bearing
+        location.bearing,
+        isExample
     )
 
     val location: Location
