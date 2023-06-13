@@ -23,10 +23,10 @@ import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
+import com.mapbox.mapboxsdk.style.expressions.Expression
 import com.mapbox.mapboxsdk.style.layers.CircleLayer
 import com.mapbox.mapboxsdk.style.layers.FillLayer
 import com.mapbox.mapboxsdk.style.layers.HeatmapLayer
-import com.mapbox.mapboxsdk.style.layers.Layer
 import com.mapbox.mapboxsdk.style.layers.LineLayer
 import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.Property.LINE_JOIN_ROUND
@@ -80,6 +80,10 @@ class HistoryProcessorFragment : Fragment() {
                 }
 
                 HistoryMapTouchMode.Draw -> {
+                    // clear previous selection
+                    updateAreaFilterOnMap(hide = true)
+                    areaFilterOutline.clear()
+                    areaFilterPolygon.clear()
                     binding.mapView.setOnTouchListener(drawTouchListener)
                     binding.filterCardCreateAreaButton.visibility = View.GONE
                     binding.filterCardAreaHintText.visibility = View.VISIBLE
@@ -94,13 +98,11 @@ class HistoryProcessorFragment : Fragment() {
                     // reset map touch mode
                     mapTouchMode = HistoryMapTouchMode.Move
                     updateAreaFilterOnMap(hide = true)
-                    loadLocations()
                     updateTimeFilterLabel()
                 }
 
                 HistoryMapFilterMode.Area -> {
-                    // TODO: add bounds
-                    loadLocations()
+                    updateAreaFilterOnMap()
                 }
             }
         }
@@ -123,13 +125,11 @@ class HistoryProcessorFragment : Fragment() {
 
         binding = FragmentLocationHistoryBinding.inflate(inflater, container, false)
         binding.mapView.getMapAsync { map ->
-            map.getStyle {
-                initMapForAreaFilterSelection()
-            }
             map.setStyle(LocationPrivacyToolkit.mapTilesUrl)
             loadLocations()
         }
 
+        initMapSourcesAndLayers()
         initFloatingActionButtons()
         initFilterOptions()
 
@@ -215,6 +215,8 @@ class HistoryProcessorFragment : Fragment() {
     private fun initFilterOptions() {
         binding.filterCardCloseButton.setOnClickListener {
             binding.filterCard.visibility = View.GONE
+            updateMapPadding()
+            updateAreaFilterOnMap(hide = true)
         }
         binding.filterFab.setOnClickListener {
             val showFilter = binding.filterCard.visibility == View.GONE
@@ -226,6 +228,8 @@ class HistoryProcessorFragment : Fragment() {
                 timeFilterRange = LongRange(startTime, endTime)
                 updateTimeFilterLabel()
             }
+            updateMapPadding()
+            updateAreaFilterOnMap(hide = !showFilter)
         }
 
         binding.filterToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
@@ -281,11 +285,63 @@ class HistoryProcessorFragment : Fragment() {
             }
             dateRangePicker.show(parentFragmentManager, null)
         }
+
+        binding.filterCard.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> updateMapPadding() }
     }
 
-    private fun initMapForAreaFilterSelection() {
+    private fun initMapSourcesAndLayers() {
         binding.mapView.getMapAsync { map ->
-            map.style?.let { style ->
+            map.getStyle { style ->
+                // locations
+                style.addSource(GeoJsonSource(LOCATIONS_SOURCE))
+                style.addLayer(
+                    CircleLayer(
+                        LOCATIONS_LAYER, LOCATIONS_SOURCE
+                    ).withProperties(
+                        PropertyFactory.circleColor(LOCATIONS_COLOR),
+                        PropertyFactory.circleRadius(LOCATIONS_SIZE),
+                        PropertyFactory.circleOpacity(LOCATIONS_OPACITY),
+                        PropertyFactory.circlePitchAlignment(Property.CIRCLE_PITCH_ALIGNMENT_MAP),
+                        PropertyFactory.circleStrokeColor(LOCATIONS_STROKE_COLOR),
+                        PropertyFactory.circleStrokeWidth(
+                            Expression.step(
+                                Expression.zoom(), Expression.literal(
+                                    LOCATIONS_MIN_STROKE_SIZE
+                                ),
+                                Expression.stop(LOCATIONS_ZOOM_THRES, LOCATIONS_MAX_STROKE_SIZE)
+                            )
+                        )
+                    )
+                )
+                style.addLayerAbove(
+                    HeatmapLayer(
+                        LOCATIONS_HEATMAP_LAYER, LOCATIONS_SOURCE
+                    ), LOCATIONS_LAYER
+                )
+
+                // marked locations
+                style.addSource(GeoJsonSource(LOCATIONS_MARKED_SOURCE))
+                style.addLayerAbove(
+                    CircleLayer(
+                        LOCATIONS_MARKED_LAYER, LOCATIONS_MARKED_SOURCE
+                    ).withProperties(
+                        PropertyFactory.circleColor(LOCATIONS_MARKED_COLOR),
+                        PropertyFactory.circleRadius(LOCATIONS_SIZE),
+                        PropertyFactory.circleOpacity(LOCATIONS_OPACITY),
+                        PropertyFactory.circlePitchAlignment(Property.CIRCLE_PITCH_ALIGNMENT_MAP),
+                        PropertyFactory.circleStrokeColor(LOCATIONS_STROKE_COLOR),
+                        PropertyFactory.circleStrokeWidth(
+                            Expression.step(
+                                Expression.zoom(), Expression.literal(
+                                    LOCATIONS_MIN_STROKE_SIZE
+                                ),
+                                Expression.stop(LOCATIONS_ZOOM_THRES, LOCATIONS_MAX_STROKE_SIZE)
+                            )
+                        )
+                    ), LOCATIONS_HEATMAP_LAYER
+                )
+
+                // area filter
                 style.addSource(GeoJsonSource(AREA_FILTER_LINE_SOURCE))
                 style.addSource(GeoJsonSource(AREA_FILTER_FILL_SOURCE))
 
@@ -307,7 +363,6 @@ class HistoryProcessorFragment : Fragment() {
                         PropertyFactory.fillOpacity(AREA_FILTER_FILL_OPACITY)
                     ), AREA_FILTER_LINE_LAYER
                 )
-
             }
         }
     }
@@ -316,7 +371,7 @@ class HistoryProcessorFragment : Fragment() {
         val locations = lastLocations ?: return
         if (newMode != mapContentMode) {
             mapContentMode = newMode
-            addLocationsToMap(locations)
+            updateMapLocations(locations)
             updateLayerFabState()
         }
     }
@@ -346,12 +401,11 @@ class HistoryProcessorFragment : Fragment() {
 
     private fun loadLocations() {
         CoroutineScope(Dispatchers.IO).launch {
-            val locations = locationDatabase?.loadLocations() ?: emptyList()
-            lastLocations = filterLocations(locations)
+            lastLocations = locationDatabase?.loadLocations() ?: emptyList()
             withContext(Dispatchers.Main) {
                 lastLocations?.let { locations ->
                     if (locations.isNotEmpty()) {
-                        addLocationsToMap(locations)
+                        updateMapLocations(locations)
                         return@withContext
                     }
                 }
@@ -397,7 +451,8 @@ class HistoryProcessorFragment : Fragment() {
             }
 
             HistoryMapFilterMode.Area -> {
-                val polygon: Polygon = Polygon.fromLngLats(listOf(areaFilterPolygon))
+                val polygonPoints = areaFilterPolygon
+                val polygon: Polygon = Polygon.fromLngLats(listOf(polygonPoints))
                 locations.filter { l ->
                     TurfJoins.inside(Point.fromLngLat(l.longitude, l.latitude), polygon)
                 }
@@ -405,10 +460,9 @@ class HistoryProcessorFragment : Fragment() {
         }
     }
 
-    private fun addLocationsToMap(locations: List<Location>) {
-        if (locations.isEmpty()) return
+    private fun updateMapLocations(locations: List<Location>) {
         binding.mapView.getMapAsync { map ->
-            map.style?.let { style ->
+            map.getStyle { style ->
                 // add locations  layer
                 val locationPoints = locations.map { l ->
                     Point.fromLngLat(
@@ -417,14 +471,21 @@ class HistoryProcessorFragment : Fragment() {
                 }
                 val locationMultiPoint = MultiPoint.fromLngLats(locationPoints)
                 style.getSourceAs<GeoJsonSource>(LOCATIONS_SOURCE)?.setGeoJson(locationMultiPoint)
-                    ?: run {
-                        style.addSource(GeoJsonSource(LOCATIONS_SOURCE).apply {
-                            setGeoJson(locationMultiPoint)
-                        })
+                when (mapContentMode) {
+                    HistoryMapContentMode.Timeline -> {
+                        style.getLayer(LOCATIONS_LAYER)
+                            ?.setProperties(PropertyFactory.visibility(Property.VISIBLE))
+                        style.getLayer(LOCATIONS_HEATMAP_LAYER)
+                            ?.setProperties(PropertyFactory.visibility(Property.NONE))
                     }
-                style.removeLayer(LOCATIONS_LAYER)
-                val locationsLayer = createLocationsLayer()
-                style.addLayer(locationsLayer)
+
+                    HistoryMapContentMode.Heatmap -> {
+                        style.getLayer(LOCATIONS_LAYER)
+                            ?.setProperties(PropertyFactory.visibility(Property.NONE))
+                        style.getLayer(LOCATIONS_HEATMAP_LAYER)
+                            ?.setProperties(PropertyFactory.visibility(Property.VISIBLE))
+                    }
+                }
                 val bounds = LatLngBounds.fromLatLngs(locations.map { l -> LatLng(l) })
                 val update = CameraUpdateFactory.newLatLngBounds(bounds, LOCATIONS_PADDING)
                 map.easeCamera(update)
@@ -432,21 +493,24 @@ class HistoryProcessorFragment : Fragment() {
         }
     }
 
-    private fun createLocationsLayer(): Layer {
-        return when (mapContentMode) {
-            HistoryMapContentMode.Timeline -> CircleLayer(
-                LOCATIONS_LAYER, LOCATIONS_SOURCE
-            ).withProperties(
-                PropertyFactory.circleColor(LOCATIONS_COLOR),
-                PropertyFactory.circleRadius(LOCATIONS_SIZE),
-                PropertyFactory.circleOpacity(LOCATIONS_OPACITY),
-                PropertyFactory.circlePitchAlignment(Property.CIRCLE_PITCH_ALIGNMENT_MAP),
-                PropertyFactory.circleStrokeColor(LOCATIONS_STROKE_COLOR),
-                PropertyFactory.circleStrokeWidth(LOCATIONS_STROKE_SIZE)
-            )
+    private fun updateMapFilterMarkedLocations(show: Boolean = true) {
+        val visibility = if (show) Property.VISIBLE else Property.NONE
+        binding.mapView.getMapAsync { map ->
+            map.getStyle { style ->
+                style.getLayer(LOCATIONS_MARKED_LAYER)
+                    ?.setProperties(PropertyFactory.visibility(visibility))
+            }
+        }
+    }
 
-            HistoryMapContentMode.Heatmap -> HeatmapLayer(
-                LOCATIONS_LAYER, LOCATIONS_SOURCE
+    private fun updateMapPadding() {
+        binding.mapView.getMapAsync { map ->
+            val topPadding =
+                if (binding.filterCard.visibility == View.VISIBLE) binding.filterCard.height.toDouble() else 0.0
+            map.easeCamera(
+                CameraUpdateFactory.paddingTo(
+                    0.0, topPadding, 0.0, 0.0
+                )
             )
         }
     }
@@ -493,18 +557,35 @@ class HistoryProcessorFragment : Fragment() {
     }
 
     private fun updateAreaFilterOnMap(hide: Boolean = false) {
-        val polyline = LineString.fromLngLats(
-            areaFilterOutline
-        )
-        val polygon: Polygon = Polygon.fromLngLats(listOf(areaFilterPolygon))
-        binding.mapView.getMapAsync { map ->
-            map.style?.let { style ->
-                style.getSourceAs<GeoJsonSource>(AREA_FILTER_LINE_SOURCE)?.setGeoJson(
-                    if (hide) null else polyline
+        CoroutineScope(Dispatchers.IO).launch {
+            val polyline = LineString.fromLngLats(
+                if (hide) emptyList<Point>() else areaFilterOutline
+            )
+            val polygon: Polygon =
+                Polygon.fromLngLats(listOf(if (hide) emptyList<Point>() else areaFilterPolygon))
+
+            val locations = if (hide) emptyList() else lastLocations ?: emptyList()
+            val locationPoints = filterLocations(locations).map { l ->
+                Point.fromLngLat(
+                    l.longitude, l.latitude
                 )
-                style.getSourceAs<GeoJsonSource>(AREA_FILTER_FILL_SOURCE)?.setGeoJson(
-                    if (hide) null else polygon
-                )
+            }
+            val markedLocations = MultiPoint.fromLngLats(locationPoints)
+
+            withContext(Dispatchers.Main)
+            {
+                binding.mapView.getMapAsync { map ->
+                    map.style?.let { style ->
+                        style.getSourceAs<GeoJsonSource>(AREA_FILTER_LINE_SOURCE)?.setGeoJson(
+                            polyline
+                        )
+                        style.getSourceAs<GeoJsonSource>(AREA_FILTER_FILL_SOURCE)?.setGeoJson(
+                            polygon
+                        )
+                        style.getSourceAs<GeoJsonSource>(LOCATIONS_MARKED_SOURCE)
+                            ?.setGeoJson(markedLocations)
+                    }
+                }
             }
         }
     }
@@ -517,13 +598,19 @@ class HistoryProcessorFragment : Fragment() {
         private const val INITIAL_ZOOM = 3.0
 
         // general locations
-        private const val LOCATIONS_LAYER = "exclusion_zone_layer"
-        private const val LOCATIONS_SOURCE = "exclusion_zone_source"
+        private const val LOCATIONS_LAYER = "locations_layer"
+        private const val LOCATIONS_HEATMAP_LAYER = "locations_heatmap_layer"
+        private const val LOCATIONS_SOURCE = "locations_source"
+        private const val LOCATIONS_MARKED_LAYER = "locations_marked_layer"
+        private const val LOCATIONS_MARKED_SOURCE = "locations_marked_source"
         private const val LOCATIONS_COLOR = Color.BLUE
         private const val LOCATIONS_STROKE_COLOR = Color.WHITE
+        private const val LOCATIONS_MARKED_COLOR = Color.RED
         private const val LOCATIONS_SIZE = 8f
         private const val LOCATIONS_OPACITY = 0.7f
-        private const val LOCATIONS_STROKE_SIZE = 2f
+        private const val LOCATIONS_MIN_STROKE_SIZE = .5f
+        private const val LOCATIONS_MAX_STROKE_SIZE = 2f
+        private const val LOCATIONS_ZOOM_THRES = 13f
         private const val LOCATIONS_PADDING = 100
 
         // area filter selection

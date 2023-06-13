@@ -42,6 +42,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Which locations to delete?"
+                    android:textSize="16sp"
+                    android:paddingBottom="8dp"
                     app:layout_constraintBottom_toTopOf="@id/filterToggleGroup"
                     app:layout_constraintTop_toTopOf="parent" />
 
