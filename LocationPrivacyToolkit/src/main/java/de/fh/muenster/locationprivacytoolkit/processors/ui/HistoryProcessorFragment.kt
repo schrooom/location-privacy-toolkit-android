@@ -464,14 +464,6 @@ class HistoryProcessorFragment : Fragment() {
                                 snackMessage,
                                 Snackbar.LENGTH_LONG
                             )
-                        bar.setAction(
-                            R.string.historyDeleteUndo
-                        ) {
-                            CoroutineScope(Dispatchers.IO).launch {
-                                locationDatabase?.add(filteredLocations)
-                                loadLocations()
-                            }
-                        }
                         withContext(Dispatchers.Main) {
                             bar.show()
                         }
