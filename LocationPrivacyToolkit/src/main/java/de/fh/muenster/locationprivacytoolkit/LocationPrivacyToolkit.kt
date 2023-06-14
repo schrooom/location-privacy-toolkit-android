@@ -10,6 +10,7 @@ import android.os.*
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
+import de.fh.muenster.locationprivacytoolkit.processors.AbstractLocationProcessor
 import kotlinx.coroutines.*
 import java.util.concurrent.Executor
 import java.util.function.Consumer
@@ -24,7 +25,6 @@ class LocationPrivacyToolkit(
 
     private val internalListeners: MutableList<LocationListener> = mutableListOf()
     private val internalPendingIntents: MutableList<PendingIntent> = mutableListOf()
-
 
     @RequiresApi(Build.VERSION_CODES.P)
     fun isLocationEnabled(): Boolean {
@@ -163,6 +163,7 @@ class LocationPrivacyToolkit(
         // pipe location through all processors
         var l = location
         locationProcessors.forEach { p -> l = p.process(l) }
+        additionalProcessors.forEach { p -> p.process(l) }
         return l
     }
 
@@ -176,6 +177,7 @@ class LocationPrivacyToolkit(
 
     companion object {
         var mapTilesUrl: String = "https://demotiles.maplibre.org/style.json"
+        var additionalProcessors: MutableList<AbstractLocationProcessor> = mutableListOf()
     }
 }
 
