@@ -11,7 +11,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
 import android.view.ViewGroup
-import androidx.core.util.Pair
 import androidx.fragment.app.Fragment
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -34,6 +33,7 @@ import com.mapbox.mapboxsdk.style.layers.Property.LINE_JOIN_ROUND
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.turf.TurfJoins
+import com.mapbox.turf.TurfMeasurement
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkit
 import de.fh.muenster.locationprivacytoolkit.R
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
@@ -43,7 +43,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.math.RoundingMode
 import java.text.DateFormat
+import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -69,6 +71,10 @@ class HistoryProcessorFragment : Fragment() {
     private var isLayersFabExtended = false
     private val useExampleData: Boolean
         get() = locationPrivacyConfig?.getUseExampleData() ?: false
+    private val firstLocationTime: Long?
+        get() = lastLocations?.minBy { l -> l.time }?.time
+    private val lastLocationTime: Long?
+        get() = lastLocations?.maxBy { l -> l.time }?.time
 
     // map modes
     private var mapContentMode: HistoryMapContentMode = HistoryMapContentMode.Timeline
@@ -78,7 +84,15 @@ class HistoryProcessorFragment : Fragment() {
             when (value) {
                 HistoryMapTouchMode.Move -> {
                     binding.mapView.setOnTouchListener(null)
-                    binding.filterCardCreateAreaButton.visibility = View.VISIBLE
+                    if (areaFilterPolygon.isNotEmpty()) {
+                        binding.filterCardCreateAreaButton.visibility = View.GONE
+                        binding.filterCardClearAreaButton.visibility = View.VISIBLE
+                        binding.filterCardAreaInfoText.visibility = View.VISIBLE
+                    } else {
+                        binding.filterCardCreateAreaButton.visibility = View.VISIBLE
+                        binding.filterCardClearAreaButton.visibility = View.GONE
+                        binding.filterCardAreaInfoText.visibility = View.GONE
+                    }
                     binding.filterCardAreaHintText.visibility = View.GONE
                 }
 
@@ -90,6 +104,7 @@ class HistoryProcessorFragment : Fragment() {
                     binding.mapView.setOnTouchListener(drawTouchListener)
                     binding.filterCardCreateAreaButton.visibility = View.GONE
                     binding.filterCardAreaHintText.visibility = View.VISIBLE
+                    binding.filterCardAreaInfoText.visibility = View.GONE
                 }
             }
         }
@@ -101,17 +116,19 @@ class HistoryProcessorFragment : Fragment() {
                     // reset map touch mode
                     mapTouchMode = HistoryMapTouchMode.Move
                     updateAreaFilterOnMap(hide = true)
+                    updateMarkedLocationsOnMap()
                     updateTimeFilterLabel()
                 }
 
                 HistoryMapFilterMode.Area -> {
-                    updateAreaFilterOnMap()
+                    updateAreaFilterOnMap(hide = false)
+                    updateMarkedLocationsOnMap()
                 }
             }
         }
 
     // filter
-    private val dateFormat = SimpleDateFormat.getDateInstance(DateFormat.SHORT)
+    private val dateFormat = SimpleDateFormat.getDateInstance(DateFormat.MEDIUM)
     private var timeFilterRange: LongRange? = null
     private val areaFilterPolygon = mutableListOf<Point>()
     private val areaFilterOutline = mutableListOf<Point>()
@@ -248,10 +265,14 @@ class HistoryProcessorFragment : Fragment() {
         }
         binding.filterCardToggleGroup.check(binding.filterCardTimeToggleButton.id)
 
-        binding.filterCardResetButton.setOnClickListener {
+        binding.filterCardClearAreaButton.setOnClickListener {
             areaFilterOutline.clear()
             areaFilterPolygon.clear()
             updateAreaFilterOnMap()
+            updateMarkedLocationsOnMap()
+            binding.filterCardClearAreaButton.visibility = View.GONE
+            binding.filterCardAreaInfoText.visibility = View.GONE
+            binding.filterCardCreateAreaButton.visibility = View.VISIBLE
         }
         binding.filterCardDeleteButton.setOnClickListener {
             deleteMarkedLocations()
@@ -260,22 +281,12 @@ class HistoryProcessorFragment : Fragment() {
         binding.filterCardCreateAreaButton.setOnClickListener {
             mapTouchMode = HistoryMapTouchMode.Draw
         }
-
-        binding.filterCardTimeDateRangeButton.setOnClickListener {
-            val dateRangePicker = MaterialDatePicker.Builder.dateRangePicker().apply {
-                setTitleText(R.string.historyFilterByTimeRange)
-                timeFilterRange?.let { range ->
-                    setSelection(Pair(range.first, range.last))
-                }
-            }.build()
-            dateRangePicker.addOnPositiveButtonClickListener { range ->
-                timeFilterRange = LongRange(range.first, range.second)
-                updateTimeFilterLabel()
-                loadLocations()
-            }
-            dateRangePicker.show(parentFragmentManager, null)
+        binding.filterCardTimeDateRangeStart.setOnClickListener {
+            showDatePicker(isStart = true)
         }
-
+        binding.filterCardTimeDateRangeEnd.setOnClickListener {
+            showDatePicker(isStart = false)
+        }
         binding.filterCard.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> updateMapPadding() }
     }
 
@@ -334,8 +345,7 @@ class HistoryProcessorFragment : Fragment() {
                 // area filter
                 style.addSource(GeoJsonSource(AREA_FILTER_LINE_SOURCE))
                 style.addSource(GeoJsonSource(AREA_FILTER_FILL_SOURCE))
-
-                style.addLayer(
+                style.addLayerBelow(
                     LineLayer(
                         AREA_FILTER_LINE_LAYER, AREA_FILTER_LINE_SOURCE
                     ).withProperties(
@@ -343,7 +353,8 @@ class HistoryProcessorFragment : Fragment() {
                         PropertyFactory.lineJoin(LINE_JOIN_ROUND),
                         PropertyFactory.lineOpacity(AREA_FILTER_LINE_OPACITY),
                         PropertyFactory.lineColor(Color.parseColor(AREA_FILTER_LINE_COLOR))
-                    )
+                    ),
+                    LOCATIONS_MARKED_LAYER
                 )
                 style.addLayerBelow(
                     FillLayer(
@@ -362,14 +373,17 @@ class HistoryProcessorFragment : Fragment() {
         binding.filterCard.visibility = if (showFilter) View.VISIBLE else View.GONE
         binding.filterFab.visibility = if (showFilter) View.GONE else View.VISIBLE
         if (showFilter && timeFilterRange == null) {
-            // init timeFilterRange
-            val startTime = lastLocations?.minBy { l -> l.time }?.time ?: 0
-            val endTime = lastLocations?.maxBy { l -> l.time }?.time ?: startTime
+            val startTime = firstLocationTime ?: Date().time
+            val endTime =
+                lastLocationTime ?: (startTime + 86400L) // fallback: startTime plus one day
             timeFilterRange = LongRange(startTime, endTime)
             updateTimeFilterLabel()
         }
         updateMapPadding()
-        updateAreaFilterOnMap(hide = !showFilter)
+        if (mapFilterMode == HistoryMapFilterMode.Area) {
+            updateAreaFilterOnMap(hide = !showFilter)
+        }
+        updateMarkedLocationsOnMap(hide = !showFilter)
     }
 
     private fun changeMapContentMode(newMode: HistoryMapContentMode) {
@@ -393,6 +407,24 @@ class HistoryProcessorFragment : Fragment() {
                 binding.heatmapLayerFabText.typeface = Typeface.DEFAULT_BOLD
             }
         }
+    }
+
+    private fun showDatePicker(isStart: Boolean) {
+        val dateRangePicker = MaterialDatePicker.Builder.datePicker().apply {
+            setTitleText(R.string.historyFilterByTimeDateHint)
+            timeFilterRange?.let { range ->
+                val selection = if (isStart) range.first else range.last
+                setSelection(selection)
+            }
+        }.build()
+        dateRangePicker.addOnPositiveButtonClickListener { date ->
+            val startDate = if (isStart) date else timeFilterRange?.first ?: 0L
+            val endDate = if (isStart) timeFilterRange?.last ?: 0L else date
+            timeFilterRange = LongRange(startDate, endDate)
+            updateTimeFilterLabel()
+            updateMarkedLocationsOnMap()
+        }
+        dateRangePicker.show(parentFragmentManager, null)
     }
 
     private fun updateTimeFilterLabel() {
@@ -451,6 +483,7 @@ class HistoryProcessorFragment : Fragment() {
                         areaFilterOutline.clear()
                         areaFilterPolygon.clear()
                         updateAreaFilterOnMap()
+                        updateMarkedLocationsOnMap()
 
                         // show deletion snack bar
                         val snackMessage =
@@ -566,6 +599,7 @@ class HistoryProcessorFragment : Fragment() {
             }
             // draw polygon and outline
             updateAreaFilterOnMap()
+            updateMarkedLocationsOnMap()
 
             if (motionEvent.action == MotionEvent.ACTION_UP) {
                 // add the first screen touch point to the end of the outline
@@ -587,7 +621,35 @@ class HistoryProcessorFragment : Fragment() {
             )
             val polygon: Polygon =
                 Polygon.fromLngLats(listOf(if (hide) emptyList<Point>() else areaFilterPolygon))
+            val area = (TurfMeasurement.area(polygon) / 1000000.0)
 
+            withContext(Dispatchers.Main)
+            {
+                binding.mapView.getMapAsync { map ->
+                    map.style?.let { style ->
+                        style.getSourceAs<GeoJsonSource>(AREA_FILTER_LINE_SOURCE)?.setGeoJson(
+                            polyline
+                        )
+                        style.getSourceAs<GeoJsonSource>(AREA_FILTER_FILL_SOURCE)?.setGeoJson(
+                            polygon
+                        )
+                    }
+                }
+                if (area > 0.0) {
+                    val df = DecimalFormat("#.##")
+                    df.roundingMode = RoundingMode.CEILING
+                    withContext(Dispatchers.Main) {
+                        binding.filterCardAreaInfoText.text = "~${df.format(area)} km²"
+                        binding.filterCardAreaHintText.visibility = View.GONE
+                        binding.filterCardAreaInfoText.visibility = View.VISIBLE
+                    }
+                }
+            }
+        }
+    }
+
+    private fun updateMarkedLocationsOnMap(hide: Boolean = false) {
+        CoroutineScope(Dispatchers.IO).launch {
             val locations = if (hide) emptyList() else lastLocations ?: emptyList()
             val locationPoints = filterLocations(locations).map { l ->
                 Point.fromLngLat(
@@ -600,16 +662,12 @@ class HistoryProcessorFragment : Fragment() {
             {
                 binding.mapView.getMapAsync { map ->
                     map.style?.let { style ->
-                        style.getSourceAs<GeoJsonSource>(AREA_FILTER_LINE_SOURCE)?.setGeoJson(
-                            polyline
-                        )
-                        style.getSourceAs<GeoJsonSource>(AREA_FILTER_FILL_SOURCE)?.setGeoJson(
-                            polygon
-                        )
                         style.getSourceAs<GeoJsonSource>(LOCATIONS_MARKED_SOURCE)
                             ?.setGeoJson(markedLocations)
                     }
                 }
+
+                binding.filterCardDeleteButton.isEnabled = locationPoints.isNotEmpty()
             }
         }
     }

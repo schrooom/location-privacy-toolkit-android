@@ -54,8 +54,9 @@
     <string name="historyCancelAlertButton">Cancel</string>
     <string name="historyFilter">Filter Locations</string>
     <string name="historyFilterByTime">Time</string>
-    <string name="historyFilterByTimeRange">Select date range</string>
+    <string name="historyFilterByTimeDateHint">Select date</string>
     <string name="historyFilterByArea">Area</string>
+    <string name="historyFilterByAreaCreate">Create</string>
     <string name="historyFilterByAreaHint">Draw an area to select locations</string>
     <string name="historyFilterCardTitle">Which locations to delete?</string>
     <string name="historyFilterCardClose">Close Filter</string>
