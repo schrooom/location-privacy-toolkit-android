@@ -18,8 +18,8 @@ class LocationPrivacyDatabase private constructor(context: Context) {
         LocationDatabase::class.java, LOCATION_DATABASE_NAME
     ).build()
 
-    fun loadLocations(): List<Location> {
-        return database.locationDao().getAll().map { rl -> rl.location }
+    fun loadLocations(useExampleData: Boolean = false): List<Location> {
+        return database.locationDao().getAll(useExampleData).map { rl -> rl.location }
     }
 
     fun add(location: Location) {
@@ -42,8 +42,9 @@ class LocationPrivacyDatabase private constructor(context: Context) {
         database.locationDao().deleteExampleLocations()
     }
 
-    fun insertExampleLocations() {
-        database.locationDao().getAll(isExample = true)
+    fun addExampleLocations(locations: List<Location>) {
+        database.locationDao()
+            .insertAll(*locations.map { l -> RoomLocation(l, isExample = true) }.toTypedArray())
     }
 
     companion object {

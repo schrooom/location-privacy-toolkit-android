@@ -67,6 +67,8 @@ class HistoryProcessorFragment : Fragment() {
     private var locationPrivacyConfig: LocationPrivacyConfigManager? = null
     private var lastLocations: List<Location>? = null
     private var isLayersFabExtended = false
+    private val useExampleData: Boolean
+        get() = locationPrivacyConfig?.getUseExampleData() ?: false
 
     // map modes
     private var mapContentMode: HistoryMapContentMode = HistoryMapContentMode.Timeline
@@ -404,7 +406,7 @@ class HistoryProcessorFragment : Fragment() {
 
     private fun loadLocations(updateCamera: Boolean = true) {
         CoroutineScope(Dispatchers.IO).launch {
-            lastLocations = locationDatabase?.loadLocations() ?: emptyList()
+            lastLocations = locationDatabase?.loadLocations(useExampleData) ?: emptyList()
             withContext(Dispatchers.Main) {
                 lastLocations?.let { locations ->
                     if (locations.isNotEmpty()) {

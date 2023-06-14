@@ -58,7 +58,21 @@
                         android:contentDescription="@string/systemPermissionShowMoreButton"
                         android:drawableEnd="@drawable/ic_arrow_down"
                         android:padding="0dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintBottom_toTopOf="@id/locationConfigMoreMenu"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="1.0"
+                        app:layout_constraintStart_toEndOf="@id/locationConfigSystemCardTitle" />
+
+                    <Button
+                        android:id="@+id/locationConfigHideMoreButton"
+                        style="?android:attr/buttonBarButtonStyle"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:contentDescription="@string/systemPermissionShowMoreButton"
+                        android:drawableEnd="@drawable/ic_arrow_up"
+                        android:padding="0dp"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toTopOf="@id/locationConfigMoreMenu"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintHorizontal_bias="1.0"
                         app:layout_constraintStart_toEndOf="@id/locationConfigSystemCardTitle" />
@@ -125,23 +139,67 @@
                         android:visibility="gone"
                         app:layout_constraintTop_toBottomOf="@id/locationConfigSystemBackgroundTitle">
 
-                        <androidx.appcompat.widget.SwitchCompat
+                        <com.google.android.material.divider.MaterialDivider
+                            android:id="@+id/locationConfigMoreDivider"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="8dp"
+                            android:paddingStart="8dp"
+                            app:layout_constraintBottom_toTopOf="@id/locationConfigMoreExampleDataText"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/locationConfigMoreExampleDataText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent" />
+                            android:paddingStart="8dp"
+                            android:paddingEnd="0dp"
+                            android:text="@string/systemPermissionUseExampleData"
+                            android:textAlignment="textStart"
+                            android:textSize="12sp"
+                            app:layout_constraintBottom_toBottomOf="@id/locationConfigMoreExampleDataSwitch"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="@id/locationConfigMoreExampleDataSwitch" />
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/locationConfigMoreExampleDataSwitch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintBottom_toTopOf="@id/locationConfigHideMoreButton"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintHorizontal_bias="1.0"
+                            app:layout_constraintStart_toEndOf="@id/locationConfigMoreExampleDataText"
+                            app:layout_constraintTop_toBottomOf="@id/locationConfigMoreDivider" />
 
                         <Button
-                            android:id="@+id/locationConfigHideMoreButton"
-                            style="?android:attr/buttonBarButtonStyle"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:contentDescription="@string/systemPermissionShowMoreButton"
-                            android:drawableEnd="@drawable/ic_arrow_up"
-                            android:padding="0dp"
+                            android:id="@+id/locationConfigImportExampleDataButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:paddingVertical="0dp"
+                            android:text="@string/systemPermissionImportExampleData"
+                            android:textSize="10sp"
+                            android:enabled="false"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@id/locationConfigDeleteExampleDataButton"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/locationConfigMoreExampleDataText" />
+
+                        <Button
+                            android:id="@+id/locationConfigDeleteExampleDataButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:textSize="10sp"
+                            android:text="@string/systemPermissionDeleteExampleData"
+                            android:enabled="false"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintHorizontal_bias="1.0" />
+                            app:layout_constraintStart_toEndOf="@id/locationConfigImportExampleDataButton"
+                            app:layout_constraintTop_toBottomOf="@id/locationConfigMoreExampleDataText" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </androidx.constraintlayout.widget.ConstraintLayout>

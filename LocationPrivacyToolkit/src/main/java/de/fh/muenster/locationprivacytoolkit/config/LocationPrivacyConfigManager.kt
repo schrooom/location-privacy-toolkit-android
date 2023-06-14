@@ -66,9 +66,18 @@ internal class LocationPrivacyConfigManager(context: Context) {
         preferences.edit(commit = true) { putString(LAST_LOCATION_KEY, jsonLocation) }
     }
 
+    fun setUseExampleData(useExampleData: Boolean) {
+        preferences.edit(commit = true) { putBoolean(USE_EXAMPLE_DATA_KEY, useExampleData) }
+    }
+
+    fun getUseExampleData(): Boolean {
+        return preferences.getBoolean(USE_EXAMPLE_DATA_KEY, false)
+    }
+
     companion object {
         const val LOCATION_PRIVACY_PREFERENCES = "location-privacy-preferences"
         const val LAST_LOCATION_KEY = "last-location"
+        const val USE_EXAMPLE_DATA_KEY = "use-example-data"
 
         fun getLocationProcessors(
             context: Context,

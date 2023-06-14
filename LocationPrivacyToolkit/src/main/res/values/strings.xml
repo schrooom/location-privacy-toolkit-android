@@ -4,6 +4,13 @@
     <string name="systemPermissionLocationAccessTitle">Location Access</string>
     <string name="systemPermissionBackgroundAccessTitle">Background Access</string>
     <string name="systemPermissionShowMoreButton">Show more</string>
+    <string name="systemPermissionUseExampleData">Use example data</string>
+    <string name="systemPermissionImportExampleData">Import</string>
+    <string name="systemPermissionDeleteExampleData">Delete</string>
+    <string name="systemPermissionDeleteExampleDataDialogTitle">Delete example locations?</string>
+    <string name="systemPermissionDeleteExampleDataDialogMessage">Are you sure to delete all example locations? This cannot be undone.</string>
+    <string name="systemPermissionDeleteExampleDataDialogDeleteButton">Delete</string>
+    <string name="systemPermissionDeleteExampleDataDialogCancelButton">Cancel</string>
     <string name="privacyConfigTitle">Privacy Configuration</string>
     <string name="accessTitle">Access</string>
     <string name="accessSubtitle">Share your location info?</string>
