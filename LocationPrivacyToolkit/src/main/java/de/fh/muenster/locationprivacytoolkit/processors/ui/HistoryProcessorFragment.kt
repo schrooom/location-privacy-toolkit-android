@@ -435,7 +435,7 @@ class HistoryProcessorFragment : Fragment() {
             val locations = lastLocations ?: return
             val filteredLocations = filterLocations(locations)
             val message =
-                String.format(getString(R.string.historyDeletedMessage), filteredLocations.size)
+                String.format(getString(R.string.historyDeleteAlertMessage), filteredLocations.size)
             val dialog = MaterialAlertDialogBuilder(c).setTitle(R.string.historyDeleteAlertTitle)
                 .setMessage(message)
                 .setNegativeButton(R.string.historyCancelAlertButton, null)
@@ -453,10 +453,15 @@ class HistoryProcessorFragment : Fragment() {
                         updateAreaFilterOnMap()
 
                         // show deletion snack bar
+                        val snackMessage =
+                            String.format(
+                                getString(R.string.historyDeletedMessage),
+                                filteredLocations.size
+                            )
                         val bar =
                             Snackbar.make(
                                 binding.root,
-                                R.string.historyDeletedMessage,
+                                snackMessage,
                                 Snackbar.LENGTH_LONG
                             )
                         bar.setAction(
