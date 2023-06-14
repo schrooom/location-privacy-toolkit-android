@@ -1,6 +1,7 @@
 package de.fh.muenster.locationprivacytoolkit.processors
 
 import android.content.Context
+import android.content.Intent
 import android.location.*
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
@@ -47,5 +48,17 @@ class ExclusionZoneProcessor(context: Context) : AbstractLocationProcessor(conte
                 }
             }
         return null
+    }
+
+    // BroadcastReceiver
+
+    override fun onReceive(context: Context, intent: Intent?) {
+        if (intent?.action == EXCLUSION_ZONES_UPDATE_BROADCAST) {
+            loadExclusionZones()
+        }
+    }
+
+    companion object {
+        val EXCLUSION_ZONES_UPDATE_BROADCAST = "exclusion_zones_update"
     }
 }

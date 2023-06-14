@@ -1,5 +1,6 @@
 package de.fh.muenster.locationprivacytoolkit.processors.ui
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -35,6 +36,7 @@ import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
 import de.fh.muenster.locationprivacytoolkit.databinding.FragmentExclusionZoneBinding
 import de.fh.muenster.locationprivacytoolkit.processors.ExclusionZone
+import de.fh.muenster.locationprivacytoolkit.processors.ExclusionZoneProcessor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -247,6 +249,7 @@ class ExclusionZoneProcessorFragment : Fragment() {
             }
         }
         binding.removeZonesButton.visibility = View.GONE
+        broadcastUpdate()
     }
 
     private fun addZonesToMap(zones: List<ExclusionZone>) {
@@ -317,6 +320,7 @@ class ExclusionZoneProcessorFragment : Fragment() {
             locationPrivacyConfig?.setPrivacyConfig(LocationPrivacyConfig.ExclusionZone, zonesJson)
             withContext(Dispatchers.Main) {
                 reloadExclusionZones()
+                broadcastUpdate()
             }
         }
     }
@@ -351,6 +355,13 @@ class ExclusionZoneProcessorFragment : Fragment() {
             }
         }
         snackbar.show()
+    }
+
+    private fun broadcastUpdate() {
+        Intent().also { intent ->
+            intent.action = ExclusionZoneProcessor.EXCLUSION_ZONES_UPDATE_BROADCAST
+            activity?.sendBroadcast(intent)
+        }
     }
 
     companion object {

@@ -1,6 +1,8 @@
 package de.fh.muenster.locationprivacytoolkit.processors
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
 import android.location.*
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkitListener
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
@@ -16,7 +18,7 @@ import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
 abstract class AbstractLocationProcessor(
     context: Context,
     var listener: LocationPrivacyToolkitListener? = null
-) {
+) : BroadcastReceiver() {
 
     abstract val sort: LocationProcessorSort
 
@@ -62,4 +64,10 @@ abstract class AbstractLocationProcessor(
      * @return A manipulated location
      */
     abstract fun manipulateLocation(location: Location, config: Int): Location?
+
+    // BroadcastReceiver
+
+    override fun onReceive(context: Context, intent: Intent?) {
+        // implement in sub-classes if needed
+    }
 }
