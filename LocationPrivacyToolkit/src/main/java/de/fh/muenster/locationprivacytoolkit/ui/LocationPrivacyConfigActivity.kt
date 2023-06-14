@@ -29,9 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.InputStream
-import java.text.SimpleDateFormat
 import java.time.Instant
-import java.util.Date
 
 
 class LocationPrivacyConfigActivity : AppCompatActivity(),
@@ -190,9 +188,13 @@ class LocationPrivacyConfigActivity : AppCompatActivity(),
                     database.addExampleLocations(locationsToImport.toList())
                 }
                 withContext(Dispatchers.Main) {
+                    val message = String.format(
+                        getString(R.string.systemPermissionImportExampleDataMessage),
+                        locationsToImport.size
+                    )
                     Snackbar.make(
                         binding.root,
-                        "imported ${locationsToImport.size} locations",
+                        message,
                         Snackbar.LENGTH_LONG
                     ).show()
                 }

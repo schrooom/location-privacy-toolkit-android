@@ -6,6 +6,7 @@
     <string name="systemPermissionShowMoreButton">Show more</string>
     <string name="systemPermissionUseExampleData">Use example data</string>
     <string name="systemPermissionImportExampleData">Import</string>
+    <string name="systemPermissionImportExampleDataMessage">%d locations imported</string>
     <string name="systemPermissionDeleteExampleData">Delete</string>
     <string name="systemPermissionDeleteExampleDataDialogTitle">Delete example locations?</string>
     <string name="systemPermissionDeleteExampleDataDialogMessage">Are you sure to delete all example locations? This cannot be undone.</string>
@@ -44,11 +45,11 @@
     <string name="historyMapLayer">Map Layers</string>
     <string name="historyMapLayerTimeline">Timeline</string>
     <string name="historyMapLayerHeatmap">Heatmap</string>
-    <string name="historyDeletedMessage">Locations deleted</string>
+    <string name="historyDeletedMessage">%d locations deleted</string>
     <string name="historyDeleteUndo">Undo</string>
     <string name="historyDelete">Delete Locations</string>
     <string name="historyDeleteAlertTitle">Delete locations</string>
-    <string name="historyDeleteAlertMessage">Are you sure to delete the selected locations? This cannot be undone.</string>
+    <string name="historyDeleteAlertMessage">Are you sure to delete the selected %d locations? This cannot be undone.</string>
     <string name="historyDeleteAlertButton">Delete</string>
     <string name="historyCancelAlertButton">Cancel</string>
     <string name="historyFilter">Filter Locations</string>

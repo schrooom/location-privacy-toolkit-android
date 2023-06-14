@@ -432,13 +432,15 @@ class HistoryProcessorFragment : Fragment() {
 
     private fun deleteMarkedLocations() {
         context?.let { c ->
+            val locations = lastLocations ?: return
+            val filteredLocations = filterLocations(locations)
+            val message =
+                String.format(getString(R.string.historyDeletedMessage), filteredLocations.size)
             val dialog = MaterialAlertDialogBuilder(c).setTitle(R.string.historyDeleteAlertTitle)
-                .setMessage(R.string.historyDeletedMessage)
+                .setMessage(message)
                 .setNegativeButton(R.string.historyCancelAlertButton, null)
                 .setPositiveButton(R.string.historyDeleteAlertButton) { _, _ ->
                     CoroutineScope(Dispatchers.IO).launch {
-                        val locations = lastLocations ?: return@launch
-                        val filteredLocations = filterLocations(locations)
                         locationDatabase?.remove(filteredLocations)
 
                         // update ui and map
