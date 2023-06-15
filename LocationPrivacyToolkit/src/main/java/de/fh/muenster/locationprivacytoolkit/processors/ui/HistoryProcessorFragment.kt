@@ -44,6 +44,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.lang.Exception
 import java.math.RoundingMode
 import java.text.DateFormat
 import java.text.DecimalFormat
@@ -512,20 +513,24 @@ class HistoryProcessorFragment : Fragment() {
     }
 
     private fun filterLocations(locations: List<Location>): List<Location> {
-        return when (mapFilterMode) {
-            HistoryMapFilterMode.Time -> {
-                timeFilterRange?.let { range ->
-                    locations.filter { l -> l.time >= range.first && l.time <= range.last }
-                } ?: locations
-            }
+        return try {
+            when (mapFilterMode) {
+                HistoryMapFilterMode.Time -> {
+                    timeFilterRange?.let { range ->
+                        locations.filter { l -> l.time >= range.first && l.time <= range.last }
+                    } ?: locations
+                }
 
-            HistoryMapFilterMode.Area -> {
-                val polygonPoints = areaFilterPolygon
-                val polygon: Polygon = Polygon.fromLngLats(listOf(polygonPoints))
-                locations.filter { l ->
-                    TurfJoins.inside(Point.fromLngLat(l.longitude, l.latitude), polygon)
+                HistoryMapFilterMode.Area -> {
+                    val polygonPoints = areaFilterPolygon.toList()
+                    val polygon: Polygon = Polygon.fromLngLats(listOf(polygonPoints))
+                    locations.filter { l ->
+                        TurfJoins.inside(Point.fromLngLat(l.longitude, l.latitude), polygon)
+                    }
                 }
             }
+        } catch (_: Exception) {
+            emptyList()
         }
     }
 
