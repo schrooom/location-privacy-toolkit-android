@@ -9,8 +9,8 @@
     <application>
         <activity
             android:name=".ui.LocationPrivacyConfigActivity"
-            android:label="@string/locationPrivacyToolkitTitle"
-            android:exported="true">
+            android:exported="true"
+            android:label="@string/locationPrivacyToolkitTitle">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />

@@ -4,7 +4,7 @@ import android.content.Context
 import android.location.*
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 
-class IntervalProcessor(context: Context): AbstractLocationProcessor(context) {
+class IntervalProcessor(context: Context) : AbstractLocationProcessor(context) {
     override val configKey = LocationPrivacyConfig.Interval
     override val sort = LocationProcessorSort.Medium
 

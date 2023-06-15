@@ -26,6 +26,7 @@ import com.mapbox.turf.TurfConstants.UNIT_METERS
 import com.mapbox.turf.TurfTransformation
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkit
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkitListener
+import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 import de.fh.muenster.locationprivacytoolkit.ui.LocationPrivacyConfigActivity
 import de.fh.muenster.locationprivacytoolkitapp.databinding.ActivityMainBinding
 import java.math.BigDecimal

@@ -16,8 +16,7 @@ import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
  * @param context The application context
  */
 abstract class AbstractLocationProcessor(
-    context: Context,
-    var listener: LocationPrivacyToolkitListener? = null
+    context: Context, var listener: LocationPrivacyToolkitListener? = null
 ) : BroadcastReceiver() {
 
     abstract val sort: LocationProcessorSort

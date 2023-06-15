@@ -134,6 +134,7 @@ class ExclusionZoneProcessorFragment : Fragment() {
     }
 
     override fun onDestroy() {
+        broadcastUpdate()
         super.onDestroy()
         binding.mapView.onDestroy()
     }
@@ -253,7 +254,6 @@ class ExclusionZoneProcessorFragment : Fragment() {
             }
         }
         binding.removeZonesButton.visibility = View.GONE
-        broadcastUpdate()
     }
 
     private fun addZonesToMap(zones: List<ExclusionZone>) {
@@ -324,7 +324,6 @@ class ExclusionZoneProcessorFragment : Fragment() {
             locationPrivacyConfig?.setPrivacyConfig(LocationPrivacyConfig.ExclusionZone, zonesJson)
             withContext(Dispatchers.Main) {
                 reloadExclusionZones()
-                broadcastUpdate()
             }
         }
     }
@@ -363,12 +362,15 @@ class ExclusionZoneProcessorFragment : Fragment() {
 
     private fun broadcastUpdate() {
         Intent().also { intent ->
-            intent.action = ExclusionZoneProcessor.EXCLUSION_ZONES_UPDATE_BROADCAST
+            intent.action = ACTION_EXCLUSION_ZONE_UPDATE
             activity?.sendBroadcast(intent)
         }
     }
 
+
     companion object {
+        const val ACTION_EXCLUSION_ZONE_UPDATE =
+            "de.fh.muenster.locationprivacytoolkit.EXCLUSION_ZONE_UPDATE"
 
         // roughly Münster Westf.
         private const val INITIAL_LATITUDE = 51.961563
