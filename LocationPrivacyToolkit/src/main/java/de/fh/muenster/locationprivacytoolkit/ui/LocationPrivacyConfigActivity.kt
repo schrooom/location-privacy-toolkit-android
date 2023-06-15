@@ -9,10 +9,12 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.view.MenuItem
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
@@ -111,12 +113,28 @@ class LocationPrivacyConfigActivity : AppCompatActivity(),
         binding.locationConfigDeleteExampleDataButton.setOnClickListener {
             deleteExampleLocationData()
         }
+
+        supportFragmentManager.addOnBackStackChangedListener {
+            if (supportFragmentManager.backStackEntryCount == 0) {
+                setTitle(R.string.locationPrivacyToolkitTitle)
+                supportActionBar?.setDisplayHomeAsUpEnabled(false)
+            }
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                if (supportFragmentManager.backStackEntryCount > 0) {
+                    supportFragmentManager.popBackStack()
+                }
+                return true
+            }
+        }
+        return false
     }
 
     // LocationPrivacyConfigAdapterListener
-
-    override val fragmentManager: FragmentManager
-        get() = supportFragmentManager
 
     override fun onPrivacyConfigChanged(config: LocationPrivacyConfig, value: Int) {
         configManager.setPrivacyConfig(config, value)
@@ -129,6 +147,17 @@ class LocationPrivacyConfigActivity : AppCompatActivity(),
     @SuppressLint("NotifyDataSetChanged")
     override fun refreshRecyclerView() {
         configAdapter.notifyDataSetChanged()
+    }
+
+    override fun replaceFragment(fragment: Fragment?) {
+        fragment?.let { f ->
+            supportFragmentManager.beginTransaction().run {
+                setCustomAnimations(R.anim.push_in, R.anim.push_out, R.anim.pop_in, R.anim.pop_out)
+                replace(android.R.id.content, f)
+                addToBackStack(f::class.java.name)
+                commit()
+            }
+        }
     }
 
     private fun toggleMoreMenu() {

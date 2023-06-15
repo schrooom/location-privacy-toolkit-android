@@ -3,7 +3,7 @@ package de.fh.muenster.locationprivacytoolkit.ui
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -120,13 +120,7 @@ class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAd
             dataBinding.locationConfigChip.visibility = View.GONE
             dataBinding.locationConfigSwitch.visibility = View.GONE
             dataBinding.root.setOnClickListener {
-                config.fragment?.let {
-                    listener.fragmentManager?.beginTransaction()?.run {
-                        replace(android.R.id.content, it)
-                        addToBackStack(null)
-                        commit()
-                    }
-                }
+                listener.replaceFragment(config.fragment)
             }
         }
 
@@ -144,10 +138,10 @@ class LocationPrivacyConfigAdapter(private var listener: LocationPrivacyConfigAd
     }
 
     interface LocationPrivacyConfigAdapterListener {
-        val fragmentManager: FragmentManager?
         fun onPrivacyConfigChanged(config: LocationPrivacyConfig, value: Int)
         fun getPrivacyConfigValue(config: LocationPrivacyConfig): Int
         fun refreshRecyclerView()
+        fun replaceFragment(fragment: Fragment?)
     }
 
     companion object {

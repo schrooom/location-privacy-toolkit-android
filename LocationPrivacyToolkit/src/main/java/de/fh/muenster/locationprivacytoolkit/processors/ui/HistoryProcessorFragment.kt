@@ -11,6 +11,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -152,6 +153,9 @@ class HistoryProcessorFragment : Fragment() {
         initMapSourcesAndLayers()
         initFloatingActionButtons()
         initFilterOptions()
+
+        activity?.setTitle(R.string.historyTitle)
+        (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         return binding.root
     }

@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
@@ -95,6 +96,9 @@ class ExclusionZoneProcessorFragment : Fragment() {
             updateCreationZone(lastZoneCreationCenter)
         }
         reloadExclusionZones()
+
+        activity?.setTitle(R.string.exclusionZoneTitle)
+        (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         return binding.root
     }
