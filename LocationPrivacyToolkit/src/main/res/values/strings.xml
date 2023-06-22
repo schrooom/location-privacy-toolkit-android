@@ -1,4 +1,5 @@
 <resources>
+    <string name="locationPrivacyToolkitGlobalClose">Close</string>
     <string name="systemPermissionTitle">System Permissions</string>
     <string name="systemPermissionOpenSettingsTitle">Open System Settings</string>
     <string name="systemPermissionLocationAccessTitle">Location Access</string>
@@ -36,7 +37,11 @@
     <string name="intervalDescription">Using the interval you can determine, how often this app is able to retrieve a new location from your device. A higher value therefore leads to a less frequent retrieval of your devices location. Example: If you\'ve set to 10 Minutes, this means a new location is at maximum retrieved every 10 Minutes. In the meantime the previously retrieved location is used, which of course it might up to 10 Minutes old, which could potentially degrade the service quality.</string>
     <string name="visibilityTitle">Visibility</string>
     <string name="visibilitySubtitle">Who is your location shared with?</string>
-    <string name="visibilityDescription">TODO: Visibility-Description</string>
+    <string name="visibilityDescription">Using visibility you can determine, who your location-data is shared with on a social level. The app is responsible to handle your preference.</string>
+    <string name="visibilityNoneOption">Nobody</string>
+    <string name="visibilityFriendsOption">Friends</string>
+    <string name="visibilityContactsOption">Contacts</string>
+    <string name="visibilityEveryoneOption">Everyone</string>
     <string name="autoDeletionTitle">Auto-Deletion</string>
     <string name="autoDeletionSubtitle">How long is your location info usable?</string>
     <string name="autoDeletionDescription">Using the auto-deletion-option, you can select whether and after what time your location data is deleted. This way your location-data will be invalidated automatically.</string>
@@ -62,4 +67,7 @@
     <string name="historyFilterCardTitle">Which locations to delete?</string>
     <string name="historyFilterCardClose">Close Filter</string>
     <string name="historyFilterReset">Reset</string>
+    <string name="externalTitle">External</string>
+    <string name="externalSubtitle">Doing some external stuff to your data</string>
+    <string name="externalDescription">This is an external processor, it completely randomizes your location.</string>
 </resources>

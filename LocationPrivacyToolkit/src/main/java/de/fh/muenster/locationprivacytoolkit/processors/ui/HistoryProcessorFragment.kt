@@ -21,6 +21,7 @@ import com.mapbox.geojson.MultiPoint
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
 import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.mapboxsdk.WellKnownTileServer
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
@@ -39,7 +40,7 @@ import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkit
 import de.fh.muenster.locationprivacytoolkit.R
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
 import de.fh.muenster.locationprivacytoolkit.databinding.FragmentLocationHistoryBinding
-import de.fh.muenster.locationprivacytoolkit.processors.utils.LocationPrivacyDatabase
+import de.fh.muenster.locationprivacytoolkit.processors.db.LocationPrivacyDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -140,7 +141,11 @@ class HistoryProcessorFragment : Fragment() {
     ): View {
         super.onCreate(savedInstanceState)
         context?.let {
-            Mapbox.getInstance(it)
+            try {
+                Mapbox.getInstance(it, "sk.not_needed", WellKnownTileServer.MapLibre)
+            } catch (_: Exception) {
+            } catch (_: NoClassDefFoundError) {
+            }
             locationPrivacyConfig = LocationPrivacyConfigManager(it)
             locationDatabase = LocationPrivacyDatabase.sharedInstance(it)
         }

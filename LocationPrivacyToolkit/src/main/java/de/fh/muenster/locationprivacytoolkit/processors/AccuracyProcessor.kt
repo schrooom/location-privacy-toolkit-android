@@ -3,19 +3,26 @@ package de.fh.muenster.locationprivacytoolkit.processors
 import android.content.Context
 import android.location.*
 import android.util.Log
+import de.fh.muenster.locationprivacytoolkit.R
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
+import de.fh.muenster.locationprivacytoolkit.processors.utils.LocationProcessorUserInterface
 import gov.nasa.worldwind.geom.LatLon
 import gov.nasa.worldwind.geom.LatLon.rhumbEndPosition
 import gov.nasa.worldwind.globes.Earth
 
 /**
  * The AccuracyProcessor changes the accuracy of a location.
- *
- * @param context Application context
  */
-class AccuracyProcessor(context: Context): AbstractLocationProcessor(context) {
-    override val configKey = LocationPrivacyConfig.Accuracy
-    override val sort = LocationProcessorSort.Medium
+class AccuracyProcessor(context: Context) : AbstractInternalLocationProcessor(context) {
+
+    override val config = LocationPrivacyConfig.Accuracy
+    override val titleId = R.string.accuracyTitle
+    override val subtitleId = R.string.accuracySubtitle
+    override val descriptionId = R.string.accuracyDescription
+    override val userInterface = LocationProcessorUserInterface.Slider
+    override val values = arrayOf(1000, 500, 100, 0)
+
+    override fun formatLabel(value: Int): String = "${value}m"
 
     /**
      * The location will be moved to a random point around the actual
@@ -28,7 +35,7 @@ class AccuracyProcessor(context: Context): AbstractLocationProcessor(context) {
 
         // TODO: translate config to actual desired accuracy in meters
         val randomDirection = (0..359).random()
-        val randomDistance =  (0..config).random()
+        val randomDistance = (0..config).random()
 
         Log.d("distance", randomDistance.toString())
 

@@ -9,9 +9,10 @@ import android.location.*
 import android.os.*
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
-import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
-import de.fh.muenster.locationprivacytoolkit.processors.AbstractLocationProcessor
+import de.fh.muenster.locationprivacytoolkit.processors.AbstractInternalLocationProcessor
+import de.fh.muenster.locationprivacytoolkit.processors.AbstractExternalLocationProcessor
+import de.fh.muenster.locationprivacytoolkit.processors.utils.LocationPrivacyVisibility
 import kotlinx.coroutines.*
 import java.util.concurrent.Executor
 import java.util.function.Consumer
@@ -20,10 +21,13 @@ class LocationPrivacyToolkit(
     context: Context, listener: LocationPrivacyToolkitListener? = null
 ) : LocationListener {
 
-    private val locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
-    private val locationProcessors =
-        LocationPrivacyConfigManager.getLocationProcessors(context, listener)
+    init {
+        internalProcessors.addAll(
+            LocationPrivacyConfigManager.getLocationProcessors(context, listener)
+        )
+    }
 
+    private val locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
     private val internalListeners: MutableList<LocationListener> = mutableListOf()
     private val internalPendingIntents: MutableList<PendingIntent> = mutableListOf()
 
@@ -163,8 +167,8 @@ class LocationPrivacyToolkit(
     fun processLocation(location: Location?): Location? {
         // pipe location through all processors
         var l = location
-        locationProcessors.forEach { p -> l = p.process(l) }
-        additionalProcessors.forEach { p -> p.process(l) }
+        internalProcessors.forEach { p -> l = p.process(l) }
+        externalProcessors.forEach { p -> l = p.process(l) }
         return l
     }
 
@@ -177,8 +181,9 @@ class LocationPrivacyToolkit(
     }
 
     companion object {
+        internal val internalProcessors: MutableList<AbstractInternalLocationProcessor> = mutableListOf()
+        var externalProcessors: MutableList<AbstractExternalLocationProcessor> = mutableListOf()
         var mapTilesUrl: String = "https://demotiles.maplibre.org/style.json"
-        var additionalProcessors: MutableList<AbstractLocationProcessor> = mutableListOf()
     }
 }
 
@@ -187,4 +192,5 @@ interface LocationPrivacyToolkitListener {
     fun onRemoveLocation(timestamp: Long)
     fun onRemoveLocations(locations: List<Location>)
     fun onRemoveLocationRange(fromTimestamp: Long, toTimestamp: Long)
+    fun onUpdateVisibilityPreference(visibility: LocationPrivacyVisibility)
 }

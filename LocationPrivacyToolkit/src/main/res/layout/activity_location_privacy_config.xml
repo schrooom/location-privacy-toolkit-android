@@ -137,7 +137,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:visibility="gone"
-                        app:layout_constraintTop_toBottomOf="@id/locationConfigSystemBackgroundTitle">
+                        app:layout_constraintTop_toBottomOf="@id/locationConfigSystemBackgroundTitle"
+                        app:layout_constraintBottom_toBottomOf="parent">
 
                         <com.google.android.material.divider.MaterialDivider
                             android:id="@+id/locationConfigMoreDivider"
@@ -168,7 +169,7 @@
                             android:id="@+id/locationConfigMoreExampleDataSwitch"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            app:layout_constraintBottom_toTopOf="@id/locationConfigHideMoreButton"
+                            app:layout_constraintBottom_toTopOf="@id/locationConfigDeleteExampleDataButton"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintHorizontal_bias="1.0"
                             app:layout_constraintStart_toEndOf="@id/locationConfigMoreExampleDataText"
@@ -179,7 +180,6 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="12dp"
-                            android:paddingVertical="0dp"
                             android:text="@string/systemPermissionImportExampleData"
                             android:textSize="10sp"
                             android:enabled="false"

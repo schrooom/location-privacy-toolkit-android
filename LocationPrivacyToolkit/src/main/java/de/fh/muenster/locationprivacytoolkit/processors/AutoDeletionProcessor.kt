@@ -3,14 +3,27 @@ package de.fh.muenster.locationprivacytoolkit.processors
 import android.content.Context
 import android.location.*
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkitListener
+import de.fh.muenster.locationprivacytoolkit.R
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
+import de.fh.muenster.locationprivacytoolkit.processors.utils.LocationProcessorUserInterface
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class AutoDeletionProcessor(context: Context, listener: LocationPrivacyToolkitListener?): AbstractLocationProcessor(context, listener) {
-    override val configKey = LocationPrivacyConfig.AutoDeletion
-    override val sort = LocationProcessorSort.Low
+/**
+ * The AutoDeletionProcessor changes deletes location after a specified time.
+ */
+class AutoDeletionProcessor(context: Context, listener: LocationPrivacyToolkitListener?) :
+    AbstractInternalLocationProcessor(context, listener) {
+
+    override val config = LocationPrivacyConfig.AutoDeletion
+    override val titleId = R.string.autoDeletionTitle
+    override val subtitleId = R.string.autoDeletionSubtitle
+    override val descriptionId = R.string.autoDeletionDescription
+    override val userInterface = LocationProcessorUserInterface.Slider
+    override val values = arrayOf(1000, 600, 60, 0)
+
+    override fun formatLabel(value: Int): String = "${value}s"
 
     override fun manipulateLocation(location: Location, config: Int): Location {
         if (config > 0) {

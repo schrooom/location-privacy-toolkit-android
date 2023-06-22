@@ -9,22 +9,23 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkit
 import de.fh.muenster.locationprivacytoolkit.R
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
 import de.fh.muenster.locationprivacytoolkit.databinding.ActivityLocationPrivacyConfigBinding
-import de.fh.muenster.locationprivacytoolkit.processors.utils.LocationPrivacyDatabase
+import de.fh.muenster.locationprivacytoolkit.processors.db.LocationPrivacyDatabase
 import gov.nasa.worldwind.formats.gpx.GpxReader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,10 +36,10 @@ import java.time.Instant
 
 
 class LocationPrivacyConfigActivity : AppCompatActivity(),
-    LocationPrivacyConfigAdapter.LocationPrivacyConfigAdapterListener {
+    LocationProcessorAdapter.LocationPrivacyConfigAdapterListener {
 
     private lateinit var binding: ActivityLocationPrivacyConfigBinding
-    private lateinit var configAdapter: LocationPrivacyConfigAdapter
+    private lateinit var configAdapter: LocationProcessorAdapter
     private lateinit var configManager: LocationPrivacyConfigManager
     private val database by lazy { LocationPrivacyDatabase.sharedInstance(this) }
 
@@ -57,10 +58,11 @@ class LocationPrivacyConfigActivity : AppCompatActivity(),
         binding = ActivityLocationPrivacyConfigBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        configAdapter = LocationPrivacyConfigAdapter(this).apply {
-            val keys = LocationPrivacyConfig.values().toList()
-            submitList(keys)
-            notifyItemRangeChanged(0, keys.size)
+        configAdapter = LocationProcessorAdapter(this).apply {
+            val processors =
+                LocationPrivacyToolkit.internalProcessors.plus(LocationPrivacyToolkit.externalProcessors)
+            submitList(processors)
+            notifyItemRangeChanged(0, processors.size)
         }
         binding.locationConfigRecyclerView.adapter = configAdapter
         val dividerItemDecoration = DividerItemDecoration(
@@ -140,8 +142,9 @@ class LocationPrivacyConfigActivity : AppCompatActivity(),
         configManager.setPrivacyConfig(config, value)
     }
 
-    override fun getPrivacyConfigValue(config: LocationPrivacyConfig): Int {
-        return configManager.getPrivacyConfig(config) ?: config.defaultValue
+    override fun getPrivacyConfigValue(config: LocationPrivacyConfig): Int? {
+        val x = configManager.getPrivacyConfig(config)
+        return x
     }
 
     @SuppressLint("NotifyDataSetChanged")

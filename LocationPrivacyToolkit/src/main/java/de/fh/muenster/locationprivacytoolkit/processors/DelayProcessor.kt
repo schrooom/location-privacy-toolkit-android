@@ -2,13 +2,26 @@ package de.fh.muenster.locationprivacytoolkit.processors
 
 import android.content.Context
 import android.location.*
+import de.fh.muenster.locationprivacytoolkit.R
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
+import de.fh.muenster.locationprivacytoolkit.processors.utils.LocationProcessorUserInterface
 
-class DelayProcessor(context: Context) : AbstractLocationProcessor(context) {
-    override val configKey = LocationPrivacyConfig.Delay
-    override val sort = LocationProcessorSort.Low
+/**
+ * The DelayProcessor holds back locations with a given delay
+ * and returns viable previous locations if available.
+ */
+class DelayProcessor(context: Context) : AbstractInternalLocationProcessor(context) {
 
-    var previousLocations: MutableList<Location> = mutableListOf()
+    override val config = LocationPrivacyConfig.Delay
+    override val titleId = R.string.delayTitle
+    override val subtitleId = R.string.delaySubtitle
+    override val descriptionId = R.string.delayDescription
+    override val userInterface = LocationProcessorUserInterface.Slider
+    override val values = arrayOf(1000, 300, 60, 10, 0)
+
+    override fun formatLabel(value: Int): String = "${value}s"
+
+    private var previousLocations: MutableList<Location> = mutableListOf()
 
     override fun manipulateLocation(location: Location, config: Int): Location? {
         previousLocations.add(location)

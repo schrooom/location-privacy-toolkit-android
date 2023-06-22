@@ -19,6 +19,7 @@ import com.mapbox.geojson.MultiPolygon
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
 import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.mapboxsdk.WellKnownTileServer
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.plugins.annotation.OnSymbolDragListener
@@ -37,11 +38,11 @@ import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
 import de.fh.muenster.locationprivacytoolkit.databinding.FragmentExclusionZoneBinding
 import de.fh.muenster.locationprivacytoolkit.processors.ExclusionZone
-import de.fh.muenster.locationprivacytoolkit.processors.ExclusionZoneProcessor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.lang.Exception
 import kotlin.math.roundToInt
 
 
@@ -58,7 +59,11 @@ class ExclusionZoneProcessorFragment : Fragment() {
     ): View {
         super.onCreate(savedInstanceState)
         context?.let {
-            Mapbox.getInstance(it)
+            try {
+                Mapbox.getInstance(it, "sk.not_needed", WellKnownTileServer.MapLibre)
+            } catch (_: Exception) {
+            } catch (_: NoClassDefFoundError) {
+            }
             locationPrivacyConfig = LocationPrivacyConfigManager(it)
         }
 

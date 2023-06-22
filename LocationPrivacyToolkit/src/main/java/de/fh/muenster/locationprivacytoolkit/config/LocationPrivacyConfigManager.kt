@@ -1,25 +1,29 @@
 package de.fh.muenster.locationprivacytoolkit.config
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.location.Location
+import android.util.Log
 import androidx.core.content.edit
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkitListener
-import de.fh.muenster.locationprivacytoolkit.processors.AbstractLocationProcessor
+import de.fh.muenster.locationprivacytoolkit.processors.AbstractInternalLocationProcessor
 import java.lang.Exception
-import java.lang.ref.WeakReference
 
 internal class LocationPrivacyConfigManager(context: Context) {
 
     private val preferences =
         context.getSharedPreferences(LOCATION_PRIVACY_PREFERENCES, Context.MODE_PRIVATE)
 
-    fun getPrivacyConfig(key: LocationPrivacyConfig): Int? {
-        return if (preferences.contains(key.name)) {
+    fun getPrivacyConfig(config: LocationPrivacyConfig): Int? {
+        val x = getPrivacyConfig(config.name)
+        Log.e("DEBUG get", config.name + " " + x?.toString())
+        return x
+    }
+    fun getPrivacyConfig(key: String): Int? {
+        return if (preferences.contains(key)) {
             try {
-                preferences.getInt(key.name, -1)
+                preferences.getInt(key, -1)
             } catch (e: Exception) {
                 null
             }
@@ -28,24 +32,37 @@ internal class LocationPrivacyConfigManager(context: Context) {
         }
     }
 
-    fun getPrivacyConfigString(key: LocationPrivacyConfig): String? {
-        return if (preferences.contains(key.name)) {
-            preferences.getString(key.name, "")
+    fun getPrivacyConfigString(config: LocationPrivacyConfig): String? {
+        return getPrivacyConfigString(config.name)
+    }
+
+    fun getPrivacyConfigString(key: String): String? {
+        return if (preferences.contains(key)) {
+            preferences.getString(key, "")
         } else {
             null
         }
     }
 
-    fun setPrivacyConfig(key: LocationPrivacyConfig, value: Int) {
-        preferences.edit(commit = true) { putInt(key.name, value) }
+    fun setPrivacyConfig(config: LocationPrivacyConfig, value: Int) {
+        setPrivacyConfig(config.name, value)
+
+        Log.e("DEBUG set", config.name + " " + value.toString())
+    }
+
+    fun setPrivacyConfig(key: String, value: Int) {
+        preferences.edit(commit = true) { putInt(key, value) }
     }
 
     fun setPrivacyConfig(key: LocationPrivacyConfig, value: String) {
         preferences.edit(commit = true) { putString(key.name, value) }
     }
+    fun removePrivacyConfig(config: LocationPrivacyConfig) {
+        removePrivacyConfig(config.name)
+    }
 
-    fun removePrivacyConfig(key: LocationPrivacyConfig) {
-        preferences.edit(commit = true) { remove(key.name) }
+    fun removePrivacyConfig(key: String) {
+        preferences.edit(commit = true) { remove(key) }
     }
 
     fun getLastLocation(): Location? {
@@ -80,13 +97,12 @@ internal class LocationPrivacyConfigManager(context: Context) {
         const val USE_EXAMPLE_DATA_KEY = "use-example-data"
 
         fun getLocationProcessors(
-            context: Context,
-            listener: LocationPrivacyToolkitListener?
-        ): List<AbstractLocationProcessor> {
+            context: Context, listener: LocationPrivacyToolkitListener?
+        ): List<AbstractInternalLocationProcessor> {
             val processors =
-                LocationPrivacyConfig.values()
+                LocationPrivacyConfig.values().filter { p -> p != LocationPrivacyConfig.External }
                     .mapNotNull { c -> c.getLocationProcessor(context, listener) }
-            return processors.sortedByDescending { p -> p.sort }
+            return processors.sortedBy { p -> p.sortIndex }
         }
     }
 }

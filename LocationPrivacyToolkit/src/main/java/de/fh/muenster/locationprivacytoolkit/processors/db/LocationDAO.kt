@@ -1,4 +1,4 @@
-package de.fh.muenster.locationprivacytoolkit.processors.utils
+package de.fh.muenster.locationprivacytoolkit.processors.db
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -11,7 +11,7 @@ interface LocationDAO {
     @Query("SELECT * FROM roomLocation WHERE isExample = :isExample")
     fun getAll(isExample: Boolean = false): List<RoomLocation>
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(location: RoomLocation)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

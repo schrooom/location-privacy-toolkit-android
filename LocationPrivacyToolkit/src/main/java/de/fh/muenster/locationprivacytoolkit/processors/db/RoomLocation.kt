@@ -1,9 +1,8 @@
-package de.fh.muenster.locationprivacytoolkit.processors.utils
+package de.fh.muenster.locationprivacytoolkit.processors.db
 
 import android.location.Location
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 
 @Entity(primaryKeys = ["time", "latitude", "longitude"])
 data class RoomLocation(

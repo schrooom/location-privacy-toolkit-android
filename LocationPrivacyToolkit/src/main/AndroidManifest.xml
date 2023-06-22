@@ -17,7 +17,7 @@
         </activity>
 
         <receiver
-            android:name=".processors.AbstractLocationProcessor"
+            android:name=".processors.AbstractInternalLocationProcessor"
             android:exported="false" />
     </application>
 

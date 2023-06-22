@@ -1,4 +1,4 @@
-package de.fh.muenster.locationprivacytoolkit.processors.utils
+package de.fh.muenster.locationprivacytoolkit.processors.db
 
 import android.content.Context
 import android.location.Location
