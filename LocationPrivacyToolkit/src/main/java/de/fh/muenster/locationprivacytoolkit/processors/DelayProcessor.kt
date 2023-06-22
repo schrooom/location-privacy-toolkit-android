@@ -4,6 +4,7 @@ import android.content.Context
 import android.location.*
 import de.fh.muenster.locationprivacytoolkit.R
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
+import de.fh.muenster.locationprivacytoolkit.processors.utils.DurationFormat
 import de.fh.muenster.locationprivacytoolkit.processors.utils.LocationProcessorUserInterface
 
 /**
@@ -19,7 +20,8 @@ class DelayProcessor(context: Context) : AbstractInternalLocationProcessor(conte
     override val userInterface = LocationProcessorUserInterface.Slider
     override val values = arrayOf(1000, 300, 60, 10, 0)
 
-    override fun formatLabel(value: Int): String = "${value}s"
+    override fun formatLabel(value: Int): String =
+        DurationFormat.humanReadableFormat(value.toLong())
 
     private var previousLocations: MutableList<Location> = mutableListOf()
 

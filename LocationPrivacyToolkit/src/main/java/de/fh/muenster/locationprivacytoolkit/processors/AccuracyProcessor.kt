@@ -5,6 +5,7 @@ import android.location.*
 import android.util.Log
 import de.fh.muenster.locationprivacytoolkit.R
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
+import de.fh.muenster.locationprivacytoolkit.processors.utils.DistanceFormat
 import de.fh.muenster.locationprivacytoolkit.processors.utils.LocationProcessorUserInterface
 import gov.nasa.worldwind.geom.LatLon
 import gov.nasa.worldwind.geom.LatLon.rhumbEndPosition
@@ -22,7 +23,7 @@ class AccuracyProcessor(context: Context) : AbstractInternalLocationProcessor(co
     override val userInterface = LocationProcessorUserInterface.Slider
     override val values = arrayOf(1000, 500, 100, 0)
 
-    override fun formatLabel(value: Int): String = "${value}m"
+    override fun formatLabel(value: Int): String = DistanceFormat.formatDistance(value)
 
     /**
      * The location will be moved to a random point around the actual
