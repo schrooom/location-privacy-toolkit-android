@@ -1,6 +1,5 @@
 package de.fh.muenster.locationprivacytoolkit.ui
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +13,6 @@ import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfig
 import de.fh.muenster.locationprivacytoolkit.databinding.ListItemLocationProcessorBinding
 import de.fh.muenster.locationprivacytoolkit.processors.AbstractInternalLocationProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.utils.LocationProcessorUserInterface
-import kotlinx.coroutines.processNextEventInCurrentThread
 
 
 class LocationProcessorAdapter(private var listener: LocationPrivacyConfigAdapterListener) :

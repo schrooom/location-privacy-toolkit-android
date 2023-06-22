@@ -2,7 +2,6 @@ package de.fh.muenster.locationprivacytoolkit.config
 
 import android.content.Context
 import android.location.Location
-import android.util.Log
 import androidx.core.content.edit
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
@@ -16,9 +15,7 @@ internal class LocationPrivacyConfigManager(context: Context) {
         context.getSharedPreferences(LOCATION_PRIVACY_PREFERENCES, Context.MODE_PRIVATE)
 
     fun getPrivacyConfig(config: LocationPrivacyConfig): Int? {
-        val x = getPrivacyConfig(config.name)
-        Log.e("DEBUG get", config.name + " " + x?.toString())
-        return x
+        return getPrivacyConfig(config.name)
     }
     fun getPrivacyConfig(key: String): Int? {
         return if (preferences.contains(key)) {
@@ -46,8 +43,6 @@ internal class LocationPrivacyConfigManager(context: Context) {
 
     fun setPrivacyConfig(config: LocationPrivacyConfig, value: Int) {
         setPrivacyConfig(config.name, value)
-
-        Log.e("DEBUG set", config.name + " " + value.toString())
     }
 
     fun setPrivacyConfig(key: String, value: Int) {
