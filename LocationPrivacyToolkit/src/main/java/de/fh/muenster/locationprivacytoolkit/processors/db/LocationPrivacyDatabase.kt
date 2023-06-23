@@ -22,6 +22,22 @@ class LocationPrivacyDatabase private constructor(context: Context) {
         return database.locationDao().getAll(useExampleData).map { rl -> rl.location }
     }
 
+    fun loadLocations(
+        useExampleData: Boolean = false,
+        fromTimestamp: Long,
+        toTimestamp: Long
+    ): List<Location> {
+        return database.locationDao().getAll(useExampleData, fromTimestamp, toTimestamp)
+            .map { rl -> rl.location }
+    }
+
+    fun loadLocation(
+        useExampleData: Boolean = false,
+        atTimestamp: Long
+    ): Location {
+        return database.locationDao().get(useExampleData, atTimestamp).location
+    }
+
     fun add(location: Location) {
         database.locationDao().insert(RoomLocation(location))
     }

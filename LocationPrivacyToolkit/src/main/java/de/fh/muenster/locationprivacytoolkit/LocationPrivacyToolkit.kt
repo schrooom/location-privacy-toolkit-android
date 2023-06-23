@@ -12,6 +12,8 @@ import androidx.annotation.RequiresPermission
 import de.fh.muenster.locationprivacytoolkit.config.LocationPrivacyConfigManager
 import de.fh.muenster.locationprivacytoolkit.processors.AbstractInternalLocationProcessor
 import de.fh.muenster.locationprivacytoolkit.processors.AbstractExternalLocationProcessor
+import de.fh.muenster.locationprivacytoolkit.processors.db.LocationDatabase
+import de.fh.muenster.locationprivacytoolkit.processors.db.LocationPrivacyDatabase
 import de.fh.muenster.locationprivacytoolkit.processors.utils.LocationPrivacyVisibility
 import kotlinx.coroutines.*
 import java.util.concurrent.Executor
@@ -30,6 +32,23 @@ class LocationPrivacyToolkit(
     private val locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
     private val internalListeners: MutableList<LocationListener> = mutableListOf()
     private val internalPendingIntents: MutableList<PendingIntent> = mutableListOf()
+    private val locationDatabase: LocationPrivacyDatabase by lazy {
+        LocationPrivacyDatabase.sharedInstance(context)
+    }
+
+    fun loadAllLocations(): List<Location> {
+        return locationDatabase.loadLocations()
+    }
+
+    fun loadLocations(fromTimestamp: Long, toTimestamp: Long): List<Location> {
+        return locationDatabase.loadLocations(false, fromTimestamp, toTimestamp)
+    }
+
+    fun loadLocations(atTimestamp: Long): Location {
+        return locationDatabase.loadLocation(false, atTimestamp)
+    }
+
+    // LocationManager methods
 
     @RequiresApi(Build.VERSION_CODES.P)
     fun isLocationEnabled(): Boolean {
@@ -181,7 +200,8 @@ class LocationPrivacyToolkit(
     }
 
     companion object {
-        internal val internalProcessors: MutableList<AbstractInternalLocationProcessor> = mutableListOf()
+        internal val internalProcessors: MutableList<AbstractInternalLocationProcessor> =
+            mutableListOf()
         var externalProcessors: MutableList<AbstractExternalLocationProcessor> = mutableListOf()
         var mapTilesUrl: String = "https://demotiles.maplibre.org/style.json"
     }

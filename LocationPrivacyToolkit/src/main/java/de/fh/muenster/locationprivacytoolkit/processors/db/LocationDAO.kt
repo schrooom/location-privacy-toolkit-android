@@ -11,6 +11,19 @@ interface LocationDAO {
     @Query("SELECT * FROM roomLocation WHERE isExample = :isExample")
     fun getAll(isExample: Boolean = false): List<RoomLocation>
 
+    @Query("SELECT * FROM roomLocation WHERE isExample = :isExample AND time >= :fromTimestamp AND time <= :toTimestamp")
+    fun getAll(
+        isExample: Boolean = false,
+        fromTimestamp: Long,
+        toTimestamp: Long
+    ): List<RoomLocation>
+
+    @Query("SELECT * FROM roomLocation WHERE isExample = :isExample AND time == :atTimestamp LIMIT 1")
+    fun get(
+        isExample: Boolean = false,
+        atTimestamp: Long
+    ): RoomLocation
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(location: RoomLocation)
 
