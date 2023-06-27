@@ -26,8 +26,13 @@ import com.mapbox.turf.TurfConstants.UNIT_METERS
 import com.mapbox.turf.TurfTransformation
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkit
 import de.fh.muenster.locationprivacytoolkit.LocationPrivacyToolkitListener
+import de.fh.muenster.locationprivacytoolkit.processors.utils.LocationPrivacyVisibility
 import de.fh.muenster.locationprivacytoolkit.ui.LocationPrivacyConfigActivity
 import de.fh.muenster.locationprivacytoolkitapp.databinding.ActivityMainBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.SimpleDateFormat
@@ -46,8 +51,16 @@ class MainActivity : AppCompatActivity(), LocationListener, LocationPrivacyToolk
         super.onCreate(savedInstanceState)
         Mapbox.getInstance(this)
         locationToolkit = LocationPrivacyToolkit(applicationContext, this)
+        LocationPrivacyToolkit.mapTilesUrl = TILE_SERVER
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            lastLocations.addAll(locationToolkit.loadAllLocations())
+            withContext(coroutineContext) {
+                updateMapLocations()
+            }
+        }
 
         binding.configButton.setOnClickListener {
             startActivity(Intent(this, LocationPrivacyConfigActivity::class.java))
@@ -94,6 +107,18 @@ class MainActivity : AppCompatActivity(), LocationListener, LocationPrivacyToolk
         binding.mapView.getMapAsync { map ->
             map.setStyle(TILE_SERVER)
             centerMapTo(map, INITIAL_LATITUDE, INITIAL_LONGITUDE, INITIAL_ZOOM)
+        }
+        binding.tilesButton.setOnClickListener {
+            if (LocationPrivacyToolkit.mapTilesUrl == TILE_SERVER) {
+                LocationPrivacyToolkit.mapTilesUrl = ALT_TILE_SERVER
+                binding.tilesButton.setImageResource(R.drawable.ic_moon)
+            } else {
+                LocationPrivacyToolkit.mapTilesUrl = TILE_SERVER
+                binding.tilesButton.setImageResource(R.drawable.ic_sun)
+            }
+            binding.mapView.getMapAsync { map ->
+                map.setStyle(LocationPrivacyToolkit.mapTilesUrl)
+            }
         }
     }
 
@@ -280,6 +305,7 @@ class MainActivity : AppCompatActivity(), LocationListener, LocationPrivacyToolk
         // replace with proper style, if available
         // CAUTION: DO NOT COMMIT THIS URL
         private const val TILE_SERVER = "https://demotiles.maplibre.org/style.json"
+        private const val ALT_TILE_SERVER = "https://demotiles.maplibre.org/style.json"
     }
 
     // LocationPrivacyToolkitListener
@@ -300,6 +326,13 @@ class MainActivity : AppCompatActivity(), LocationListener, LocationPrivacyToolk
         }
     }
 
+    override fun onRemoveLocations(locations: List<Location>) {
+        if (this.lastLocations.removeAll(locations)) {
+            showMessage("${locations.count()} locations deleted")
+            updateMapLocations()
+        }
+    }
+
     override fun onRemoveLocationRange(fromTimestamp: Long, toTimestamp: Long) {
         if (this.lastLocations.removeAll { it.time in fromTimestamp..toTimestamp }) {
             val fromDate = dateFormat.format(Date(fromTimestamp))
@@ -307,5 +340,9 @@ class MainActivity : AppCompatActivity(), LocationListener, LocationPrivacyToolk
             showMessage("Locations from $fromDate-$toDate deleted")
             updateMapLocations()
         }
+    }
+
+    override fun onUpdateVisibilityPreference(visibility: LocationPrivacyVisibility) {
+        // update visibility accordingly
     }
 }
