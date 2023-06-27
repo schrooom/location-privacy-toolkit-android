@@ -21,7 +21,7 @@ class AccuracyProcessor(context: Context) : AbstractInternalLocationProcessor(co
     override val subtitleId = R.string.accuracySubtitle
     override val descriptionId = R.string.accuracyDescription
     override val userInterface = LocationProcessorUserInterface.Slider
-    override val values = arrayOf(1000, 500, 100, 0)
+    override val values = arrayOf(5000, 1000, 500, 100, 0)
 
     override fun formatLabel(value: Int): String = DistanceFormat.formatDistance(value)
 

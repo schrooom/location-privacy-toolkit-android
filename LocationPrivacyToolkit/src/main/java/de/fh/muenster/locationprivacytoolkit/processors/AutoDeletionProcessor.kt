@@ -23,7 +23,7 @@ class AutoDeletionProcessor(context: Context, listener: LocationPrivacyToolkitLi
     override val subtitleId = R.string.autoDeletionSubtitle
     override val descriptionId = R.string.autoDeletionDescription
     override val userInterface = LocationProcessorUserInterface.Slider
-    override val values = arrayOf(1000, 600, 60, 0)
+    override val values = arrayOf(1800, 600, 60, 10, 0)
 
     override fun formatLabel(value: Int): String =
         DurationFormat.humanReadableFormat(value.toLong())

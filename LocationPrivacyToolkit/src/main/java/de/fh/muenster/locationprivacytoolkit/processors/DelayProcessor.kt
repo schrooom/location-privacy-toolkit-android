@@ -18,7 +18,7 @@ class DelayProcessor(context: Context) : AbstractInternalLocationProcessor(conte
     override val subtitleId = R.string.delaySubtitle
     override val descriptionId = R.string.delayDescription
     override val userInterface = LocationProcessorUserInterface.Slider
-    override val values = arrayOf(1000, 300, 60, 10, 0)
+    override val values = arrayOf(1800, 300, 60, 30, 10, 0)
 
     override fun formatLabel(value: Int): String =
         DurationFormat.humanReadableFormat(value.toLong())

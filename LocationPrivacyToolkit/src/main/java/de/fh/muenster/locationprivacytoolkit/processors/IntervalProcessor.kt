@@ -18,7 +18,7 @@ class IntervalProcessor(context: Context) : AbstractInternalLocationProcessor(co
     override val subtitleId = R.string.intervalSubtitle
     override val descriptionId = R.string.intervalDescription
     override val userInterface = LocationProcessorUserInterface.Slider
-    override val values = arrayOf(1000, 600, 60, 0)
+    override val values = arrayOf(1800, 600, 60, 0)
 
     override fun formatLabel(value: Int): String =
         DurationFormat.humanReadableFormat(value.toLong())
