@@ -19,7 +19,7 @@ Location Privacy Toolkit, that can be included into Android apps. This toolkit i
 - ### [License](#license)
 
 <p align="center">
-  <img src="https://github.com/schrooom/location-privacy-toolkit-android/blob/main/resources/general_structure.png" width="75%">
+  <img src="https://github.com/schrooom/location-privacy-toolkit-android/blob/main/resources/general_structure.png" width="85%">
 </p>
 
 ## Library Usage
@@ -60,7 +60,7 @@ The core of this toolkit lies in the location processors, which enable users to 
 The `LocationPrivacyToolkit` currently comes with a total of 8 predefined processors.
 
 <p align="center">
-  <img src="https://github.com/schrooom/location-privacy-toolkit-android/blob/main/resources/location_processors.png" width="75%">
+  <img src="https://github.com/schrooom/location-privacy-toolkit-android/blob/main/resources/location_processors.png" width="85%">
 </p>
 
 | Location Processor |                                       Options (default option is bold)                                       |                                                                                                                        Effect                                                                                                                         |
@@ -70,7 +70,7 @@ The `LocationPrivacyToolkit` currently comes with a total of 8 predefined proces
 | Auto Deletion      |                 <b>0 seconds (off)</b><br>10 seconds<br>1 minute<br>10 minutes<br>30 minutes                 |                                       Automatically delets the location from the integrated location database after given time. The implementing application will also be notified about deletion of locations.                                       |
 | Delay              |          <b>0 seconds (off)</b><br>10 seconds<br>30 seconds<br>1 minute<br>5 minutes<br>30 minutes           |                                                                    Delays the users current location with the given time. Therefore an app will receive delayed locations updates.                                                                    |
 | Exclusion Zones    | Creation of exclusion zones with a diameter between 100 meters and 10 kilometers.<br><b>No default zones</b> |                                                                             Locations within defined exclusion zones are blocked and not passed onto an implementing app                                                                              |
-| History            |                                       Explore and delete location data                                       | The history processor has no active location processing and simply passes on the received location. It does however store each location into the integrated location database and users are able to explore and delete their location data precisely. |
+| History            |                       Explore and delete location data.<br><b>No default option</b>                          | The history processor has no active location processing and simply passes on the received location. It does however store each location into the integrated location database and users are able to explore and delete their location data precisely. |
 | Interval           |                 <b>0 seconds (off)</b><br>10 seconds<br>1 minute<br>10 minutes<br>30 minutes                 |                                                       Frequency of location updates is altered to the given time. Therefore an app will only receive new locations every n-th seconds/minutes.                                                        |
 | Visibility         |                            <b>Everyone (off)</b><br>Contacts<br>Friends<br>Nobody                            |          The history processor has no active location processing and hands over the preference to the implementing app, because the toolkit has no context information. Therefore the app is in charge to comply with the users preference.           |
 
@@ -110,7 +110,7 @@ LocationPrivacyToolkit.mapTilesUrl: String
 ### Architecture
 
 <p align="center">
-  <img src="https://github.com/schrooom/location-privacy-toolkit-android/blob/main/resources/detail_structure.png" width="75%">
+  <img src="https://github.com/schrooom/location-privacy-toolkit-android/blob/main/resources/detail_structure.png" width="85%">
 </p>
 
 The `LocationPrivacyToolkit` follows this high-level structure.
