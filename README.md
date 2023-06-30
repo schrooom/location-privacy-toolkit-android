@@ -13,8 +13,8 @@ Location Privacy Toolkit, that can be included into Android apps. This toolkit i
 ## Contents
 
 - ### [Library Usage](#library-usage)
-  - [Architecture](#architecture)
   - [API](#api)
+  - [Architecture](#architecture)
   - [Example](#example)
 - ### [License](#license)
 
@@ -70,7 +70,7 @@ The `LocationPrivacyToolkit` currently comes with a total of 8 predefined proces
 | Auto Deletion      |                 <b>0 seconds (off)</b><br>10 seconds<br>1 minute<br>10 minutes<br>30 minutes                 |                                       Automatically delets the location from the integrated location database after given time. The implementing application will also be notified about deletion of locations.                                       |
 | Delay              |          <b>0 seconds (off)</b><br>10 seconds<br>30 seconds<br>1 minute<br>5 minutes<br>30 minutes           |                                                                    Delays the users current location with the given time. Therefore an app will receive delayed locations updates.                                                                    |
 | Exclusion Zones    | Creation of exclusion zones with a diameter between 100 meters and 10 kilometers.<br><b>No default zones</b> |                                                                             Locations within defined exclusion zones are blocked and not passed onto an implementing app                                                                              |
-| History            |                       Explore and delete location data.<br><b>No default option</b>                          | The history processor has no active location processing and simply passes on the received location. It does however store each location into the integrated location database and users are able to explore and delete their location data precisely. |
+| History            |                        Explore and delete location data.<br><b>No default option</b>                         | The history processor has no active location processing and simply passes on the received location. It does however store each location into the integrated location database and users are able to explore and delete their location data precisely. |
 | Interval           |                 <b>0 seconds (off)</b><br>10 seconds<br>1 minute<br>10 minutes<br>30 minutes                 |                                                       Frequency of location updates is altered to the given time. Therefore an app will only receive new locations every n-th seconds/minutes.                                                        |
 | Visibility         |                            <b>Everyone (off)</b><br>Contacts<br>Friends<br>Nobody                            |          The history processor has no active location processing and hands over the preference to the implementing app, because the toolkit has no context information. Therefore the app is in charge to comply with the users preference.           |
 
@@ -127,7 +127,11 @@ The architecture used in this `LocationPrivacyToolkit` is inspired by the follow
 
 ### Example
 
-In course of the project a sample app was created. The _LocationPrivacyToolkitApp_ is included in this repository and can be seen as an example on how to integrate the `LocationPrivacyToolkit`.
+In course of the project a sample app was created. The _LocationPrivacyToolkitApp_ is included in this repository and can be seen as an example on how to integrate the `LocationPrivacyToolkit`. The app consists of a very basic user interface to register and unregister for location updates from the toolkit. It has a simple switch for toggling the map tiles (if set) and another floating action button, that gives access to the `LocationPrivacyConfigActivity` – thus demonstrating the features of the `LocationPrivacyToolkit`.
+
+<p align="center">
+  <img src="https://github.com/schrooom/location-privacy-toolkit-android/blob/main/resources/location_privacy_toolkit_app.pdf" width="85%">
+</p>
 
 ## License
 
