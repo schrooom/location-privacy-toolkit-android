@@ -130,7 +130,7 @@ The architecture used in this `LocationPrivacyToolkit` is inspired by the follow
 In course of the project a sample app was created. The _LocationPrivacyToolkitApp_ is included in this repository and can be seen as an example on how to integrate the `LocationPrivacyToolkit`. The app consists of a very basic user interface to register and unregister for location updates from the toolkit. It has a simple switch for toggling the map tiles (if set) and another floating action button, that gives access to the `LocationPrivacyConfigActivity` – thus demonstrating the features of the `LocationPrivacyToolkit`.
 
 <p align="center">
-  <img src="https://github.com/schrooom/location-privacy-toolkit-android/blob/main/resources/location_privacy_toolkit_app.pdf" width="85%">
+  <img src="https://github.com/schrooom/location-privacy-toolkit-android/blob/main/resources/location_privacy_toolkit_app.png" width="85%">
 </p>
 
 ## License
