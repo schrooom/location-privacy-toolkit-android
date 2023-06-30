@@ -2,6 +2,7 @@ plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
+    id 'maven-publish'
 }
 
 android {
@@ -9,7 +10,7 @@ android {
     compileSdk 33
 
     defaultConfig {
-        minSdk 21
+        minSdk 26
         targetSdk 33
         versionCode 2
         versionName '2.0.0'
@@ -28,6 +29,12 @@ android {
     buildFeatures {
         dataBinding true
     }
+
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+        }
+    }
 }
 
 dependencies {
@@ -43,11 +50,25 @@ dependencies {
     implementation 'org.maplibre.gl:android-plugin-annotation-v9:1.0.0'
 
     // room database
-    def room_version = "2.5.1"
+    def room_version = "2.5.2"
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+
+                groupId = 'com.github.schroom'
+                artifactId = 'location-privacy-toolkit'
+                version = '1.0.0'
+            }
+        }
+    }
 }
