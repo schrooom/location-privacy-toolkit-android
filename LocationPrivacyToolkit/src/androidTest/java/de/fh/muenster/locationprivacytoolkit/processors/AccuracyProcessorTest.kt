@@ -23,6 +23,7 @@ class AccuracyProcessorTest {
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         val config = LocationPrivacyConfigManager(appContext)
         config.setPrivacyConfig(LocationPrivacyConfig.Accuracy, 50)
+        config.setPrivacyConfig(LocationPrivacyConfig.Access, 1)
 
         val lpt = LocationPrivacyToolkit(appContext)
 
