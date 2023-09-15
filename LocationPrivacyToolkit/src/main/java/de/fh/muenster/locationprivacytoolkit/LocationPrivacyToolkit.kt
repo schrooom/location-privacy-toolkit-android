@@ -19,7 +19,7 @@ import kotlinx.coroutines.*
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 
-class LocationPrivacyToolkit(
+open class LocationPrivacyToolkit(
     context: Context, listener: LocationPrivacyToolkitListener? = null
 ) : LocationListener {
 
