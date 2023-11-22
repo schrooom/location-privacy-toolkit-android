@@ -68,14 +68,14 @@
                     app:layout_constraintTop_toBottomOf="@id/filterCardTitle"
                     app:singleSelection="true">
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/filterCardTimeToggleButton"
                         style="?attr/materialButtonOutlinedStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:text="@string/historyFilterByTime" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/filterCardAreaToggleButton"
                         style="?attr/materialButtonOutlinedStyle"
                         android:layout_width="wrap_content"
