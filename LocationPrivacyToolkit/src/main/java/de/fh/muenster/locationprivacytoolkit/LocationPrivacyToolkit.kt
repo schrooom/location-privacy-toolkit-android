@@ -203,7 +203,7 @@ open class LocationPrivacyToolkit(
         internal val internalProcessors: MutableList<AbstractInternalLocationProcessor> =
             mutableListOf()
         var externalProcessors: MutableList<AbstractExternalLocationProcessor> = mutableListOf()
-        var mapTilesUrl: String = "https://demotiles.maplibre.org/style.json"
+        var mapTilesUrl: String = context.getString(R.string.mapTilesUrl)
     }
 }
 

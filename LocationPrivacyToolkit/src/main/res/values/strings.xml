@@ -70,4 +70,5 @@
     <string name="externalTitle">External</string>
     <string name="externalSubtitle">Doing some external stuff to your data</string>
     <string name="externalDescription">This is an external processor, it completely randomizes your location.</string>
+    <string name="mapTilesUrl">https://demotiles.maplibre.org/style.json</string>
 </resources>
