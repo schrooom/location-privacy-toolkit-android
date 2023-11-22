@@ -27,6 +27,7 @@ open class LocationPrivacyToolkit(
         internalProcessors.addAll(
             LocationPrivacyConfigManager.getLocationProcessors(context, listener)
         )
+        mapTilesUrl = context.getString(R.string.mapTilesUrl)
     }
 
     private val locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
@@ -203,7 +204,7 @@ open class LocationPrivacyToolkit(
         internal val internalProcessors: MutableList<AbstractInternalLocationProcessor> =
             mutableListOf()
         var externalProcessors: MutableList<AbstractExternalLocationProcessor> = mutableListOf()
-        var mapTilesUrl: String = context.getString(R.string.mapTilesUrl)
+        lateinit var mapTilesUrl: String
     }
 }
 
