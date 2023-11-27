@@ -117,19 +117,15 @@ class LocationPrivacyConfigActivity : AppCompatActivity(),
         }
 
         supportFragmentManager.addOnBackStackChangedListener {
-            if (supportFragmentManager.backStackEntryCount == 0) {
-                setTitle(R.string.locationPrivacyToolkitTitle)
-                supportActionBar?.setDisplayHomeAsUpEnabled(false)
-            }
+            setTitle(R.string.locationPrivacyToolkitTitle)
+            supportActionBar?.setDisplayHomeAsUpEnabled(true)
         }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> {
-                if (supportFragmentManager.backStackEntryCount > 0) {
-                    supportFragmentManager.popBackStack()
-                }
+                onBackPressed()
                 return true
             }
         }
